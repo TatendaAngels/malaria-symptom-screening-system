@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About MalariaAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+</head>
+<body class="inner-page">
+    <div class="bubble-field" aria-hidden="true"><span class="bubble bubble-a"></span><span class="bubble bubble-b"></span><span class="bubble bubble-c"></span><span class="bubble bubble-d"></span><span class="bubble bubble-e"></span></div>
+    <header class="navbar"><a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">+</span>Malaria<span>AI</span></a><nav class="nav-links"><a href="{{ url_for('home') }}">Home</a><a class="active" href="{{ url_for('about') }}">About</a><a href="{{ url_for('how_it_works') }}">How It Works</a><a href="{{ url_for('contact') }}">Contact</a></nav><a href="{{ url_for('screening') }}" class="nav-button">Start Screening ↗</a></header>
+    <main class="page-main">
+        <section class="page-intro"><span class="eyebrow">A CALMER WAY TO START</span><h1>Health information should feel <span>clear, not clinical.</span></h1><p>MalariaAI turns a worrying first question into a simple, guided moment of awareness. It gives people a useful starting point while keeping professional care at the center.</p></section>
+        <section class="about-grid"><div class="statement-panel"><span class="panel-kicker">OUR POINT OF VIEW</span><h2>Small steps can make health decisions feel more manageable.</h2><p>We designed MalariaAI around plain language, gentle guidance, and transparent limits. A screening result is a signal to help you decide what to do next, never a diagnosis.</p></div><div class="values-list"><div><b>01</b><h3>Accessible by design</h3><p>A focused experience that works wherever a person begins their health journey.</p></div><div><b>02</b><h3>Human at the center</h3><p>Technology supports awareness, while qualified medical professionals provide care.</p></div><div><b>03</b><h3>Clear about limits</h3><p>Every result is preliminary and paired with guidance to seek appropriate help.</p></div></div></section>
+    </main>
+    <footer><div class="footer-top"><strong>MalariaAI</strong><span>Intelligent health screening</span></div><p class="disclaimer">Important: MalariaAI provides preliminary symptom-based screening only. It does not diagnose malaria or replace a medical examination or malaria test.</p><p class="copyright">© 2026 MalariaAI. All rights reserved.</p></footer>
+</body>
+</html>
