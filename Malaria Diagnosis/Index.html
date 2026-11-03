@@ -1,0 +1,409 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malaria Care - Diagnosis Support System</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="app" class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="side-brand">
+            <div class="mini-shield">✣</div>
+            <strong>Malaria Care</strong>
+        </div>
+
+        <nav>
+            <button class="nav-link active" data-page="dashboard">
+                <span>⌂</span> Dashboard
+            </button>
+
+            <button class="nav-link" data-page="register">
+                <span>♟</span> Register Patient
+            </button>
+
+            <button class="nav-link" data-page="diagnosis">
+                <span>⚕</span> Diagnosis
+            </button>
+
+            <button class="nav-link" data-page="results">
+                <span>▥</span> Results
+            </button>
+
+            <button class="nav-link" data-page="history">
+                <span>◴</span> History
+            </button>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-area">
+
+        <header class="topbar">
+            <button class="hamburger" id="menuToggle">☰</button>
+            <div class="admin-menu">
+                <span class="avatar">●</span> Guest
+            </div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="page active-page">
+
+            <div class="page-heading">
+                <span class="heading-icon">⌂</span>
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Welcome to the Malaria Diagnosis Support System</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+
+                <article class="stat-card">
+                    <span class="stat-icon">♟</span>
+                    <p>Total Patients</p>
+                    <strong id="totalPatients">128</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-icon">⚕</span>
+                    <p>Total Analyses</p>
+                    <strong id="totalAnalyses">115</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-icon green">✓</span>
+                    <p>Positive Cases</p>
+                    <strong id="positiveCases">62</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-icon pink">♥</span>
+                    <p>Healthy Cases</p>
+                    <strong id="healthyCases">66</strong>
+                </article>
+
+            </div>
+
+            <div class="dashboard-lower">
+
+                <article class="quick-card">
+                    <h3>Quick Actions</h3>
+
+                    <button class="primary-btn" data-go="register">
+                        ♟ Register Patient
+                    </button>
+
+                    <button class="primary-btn" data-go="diagnosis">
+                        ⚕ Run Diagnosis
+                    </button>
+
+                    <button class="primary-btn" data-go="results">
+                        ▥ View Results
+                    </button>
+                </article>
+
+                <article class="promo-card">
+                    <div>
+                        <h2>Fight Malaria Together</h2>
+                        <p>Early diagnosis saves lives.</p>
+
+                        <button class="light-btn" data-go="diagnosis">
+                            Get Started →
+                        </button>
+                    </div>
+
+                    <img src="assets/blood-cells.jpg" alt="Blood cells">
+                </article>
+
+            </div>
+        </section>
+
+        <!-- PATIENT REGISTRATION -->
+        <section id="register" class="page">
+
+            <div class="page-heading">
+                <span class="heading-icon">♟</span>
+                <div>
+                    <h1>Patient Registration</h1>
+                    <p>Enter patient information</p>
+                </div>
+            </div>
+
+            <div class="form-layout">
+
+                <form id="patientForm" class="content-card patient-form">
+
+                    <div class="form-grid">
+
+                        <label>
+                            Full Name
+                            <input id="fullName" type="text"
+                            placeholder="Enter full name" required>
+                        </label>
+
+                        <label>
+                            Gender
+                            <select id="gender" required>
+                                <option value="">Select gender</option>
+                                <option>Female</option>
+                                <option>Male</option>
+                                <option>Other</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Age
+                            <input id="age" type="number"
+                            min="0" max="120"
+                            placeholder="Enter age" required>
+                        </label>
+
+                        <label>
+                            Contact (optional)
+                            <input id="contact" type="tel"
+                            placeholder="Phone number">
+                        </label>
+
+                    </div>
+
+                    <button class="primary-btn register-submit" type="submit">
+                        ▣ Register Patient
+                    </button>
+
+                    <p id="registerMessage" class="message"></p>
+
+                </form>
+
+                <div class="heart-art">
+                    ♥
+                    <span>＋</span>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- MALARIA DIAGNOSIS -->
+        <section id="diagnosis" class="page">
+
+            <div class="page-heading">
+                <span class="heading-icon">⚕</span>
+                <div>
+                    <h1>Malaria Diagnosis</h1>
+                    <p>Enter symptoms and upload blood smear image</p>
+                </div>
+            </div>
+
+            <form id="diagnosisForm" class="content-card diagnosis-card">
+
+                <div class="diagnosis-grid">
+
+                    <fieldset>
+                        <legend>
+                            Symptoms <small>(Select applicable)</small>
+                        </legend>
+
+                        <div class="symptom-list">
+
+                            <label>
+                                <input type="checkbox" value="Fever">
+                                Fever
+                            </label>
+
+                            <label>
+                                <input type="checkbox" value="Chills">
+                                Chills
+                            </label>
+
+                            <label>
+                                <input type="checkbox" value="Headache">
+                                Headache
+                            </label>
+
+                            <label>
+                                <input type="checkbox" value="Sweating">
+                                Sweating
+                            </label>
+
+                            <label>
+                                <input type="checkbox" value="Vomiting">
+                                Vomiting
+                            </label>
+
+                            <label>
+                                <input type="checkbox" value="Body Weakness">
+                                Body Weakness
+                            </label>
+
+                        </div>
+                    </fieldset>
+
+                    <label class="upload-box" for="bloodImage">
+
+                        <span class="upload-icon">☁</span>
+
+                        <strong>Upload Blood Smear Image</strong>
+
+                        <small>PNG or JPG only</small>
+
+                        <input id="bloodImage" type="file"
+                        accept="image/png,image/jpeg">
+
+                        <img id="imagePreview" alt="Image preview">
+
+                    </label>
+
+                </div>
+
+                <button class="primary-btn analyze-btn" type="submit">
+                    ⌕ Analyze for Malaria
+                </button>
+
+                <p class="disclaimer">
+                    Student demonstration only. This page does not provide
+                    a real medical diagnosis.
+                </p>
+
+            </form>
+
+            <img class="microscope-art"
+            src="assets/microscope.jpg" alt="Microscope">
+
+        </section>
+
+        <!-- RESULTS -->
+        <section id="results" class="page">
+
+            <div class="page-heading">
+                <span class="heading-icon">▥</span>
+                <div>
+                    <h1>Diagnosis Results</h1>
+                    <p>AI Analysis Output</p>
+                </div>
+            </div>
+
+            <div class="result-layout">
+
+                <img src="assets/blood-smear.jpg"
+                class="smear-image" alt="Blood smear">
+
+                <div class="result-details">
+
+                    <div class="result-alert" id="resultAlert">
+
+                        <span>!</span>
+
+                        <div>
+                            <h2 id="resultTitle">No diagnosis yet</h2>
+
+                            <strong id="confidence">
+                                Run an analysis to view a result
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <div class="result-note">
+                        <span>✓</span>
+
+                        <p id="resultExplanation">
+                            Register a patient and complete the diagnosis
+                            form to view the demonstration result.
+                        </p>
+                    </div>
+
+                    <button class="primary-btn download-btn"
+                    id="downloadReport">
+                        ⬇ Download Report
+                    </button>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PATIENT HISTORY -->
+        <section id="history" class="page">
+
+            <div class="page-heading">
+                <span class="heading-icon">◴</span>
+                <div>
+                    <h1>Patient History</h1>
+                    <p>View previous assessments</p>
+                </div>
+            </div>
+
+            <div class="content-card table-card">
+
+                <div class="table-scroll">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Patient Name</th>
+                                <th>Age</th>
+                                <th>Date</th>
+                                <th>Result</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="historyBody">
+
+                            <tr>
+                                <td>1</td>
+                                <td>Modester Gutsire</td>
+                                <td>24</td>
+                                <td>2025-10-30</td>
+                                <td><span class="pill positive">Positive</span></td>
+                                <td><button class="view-btn">◉ View</button></td>
+                            </tr>
+
+                            <tr>
+                                <td>2</td>
+                                <td> Wilford Maputsa</td>
+                                <td>30</td>
+                                <td>2025-10-29</td>
+                                <td><span class="pill negative">Negative</span></td>
+                                <td><button class="view-btn">◉ View</button></td>
+                            </tr>
+
+                            <tr>
+                                <td>3</td>
+                                <td>Shamaine Kachingwe</td>
+                                <td>28</td>
+                                <td>2025-10-28</td>
+                                <td><span class="pill positive">Positive</span></td>
+                                <td><button class="view-btn">◉ View</button></td>
+                            </tr>
+                             <tr>
+                                <td>3</td>
+                                <td>Tatenda Gumbochuma</td>
+                                <td>28</td>
+                                <td>2025-10-28</td>
+                                <td><span class="pill positive">Positive</span></td>
+                                <td><button class="view-btn">◉ View</button></td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

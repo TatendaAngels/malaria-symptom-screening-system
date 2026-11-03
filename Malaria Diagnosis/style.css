@@ -1,0 +1,711 @@
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --purple: #501d5a;
+    --deep: #790b56;
+    --light: #f5f0ff;
+    --border: #d9c8ff;
+    --text: #5d0c3c;
+}
+
+body {
+    margin: 0;
+    font-family: Poppins, Arial, sans-serif;
+    color: var(--text);
+    background: #eee9fb;
+    font-size: 14px;
+}
+
+/* MAIN LAYOUT */
+
+.app-shell {
+    min-height: 100vh;
+    display: flex;
+    background: #f4f0ff;
+}
+
+.sidebar {
+    width: 225px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #21105d, #170c49);
+    color: white;
+    padding: 22px 13px;
+}
+
+.side-brand {
+    text-align: center;
+    height: 115px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 15px;
+}
+
+.mini-shield {
+    font-size: 27px;
+    border: 2px solid white;
+    border-radius: 45% 45% 50% 50%;
+    width: 48px;
+    height: 52px;
+    line-height: 48px;
+}
+
+.sidebar nav {
+    display: grid;
+    gap: 8px;
+}
+
+.nav-link {
+    border: 0;
+    background: transparent;
+    color: white;
+    text-align: left;
+    padding: 12px 13px;
+    border-radius: 9px;
+    font: 500 13px Poppins;
+    cursor: pointer;
+}
+
+.nav-link span {
+    display: inline-block;
+    width: 29px;
+    font-size: 17px;
+}
+
+.nav-link.active,
+.nav-link:hover {
+    background: #ac1bb4;
+}
+
+.main-area {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* TOP NAVIGATION */
+
+.topbar {
+    height: 58px;
+    background: linear-gradient(90deg, #4d159e, #27105f);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+}
+
+.hamburger {
+    background: none;
+    border: 0;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.admin-menu {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 12px;
+}
+
+.avatar {
+    display: inline-grid;
+    place-items: center;
+    background: #eee8ff;
+    color: #4f18a9;
+    width: 29px;
+    height: 29px;
+    border-radius: 50%;
+    font-size: 17px;
+}
+
+/* PAGES */
+
+.page {
+    display: none;
+    padding: 26px 30px;
+    position: relative;
+    min-height: calc(100vh - 58px);
+}
+
+.page.active-page {
+    display: block;
+}
+
+.page-heading {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+    position: relative;
+    z-index: 1;
+}
+
+.page-heading h1 {
+    font-size: 24px;
+    margin: 0;
+    line-height: 1.25;
+}
+
+.page-heading p {
+    font-size: 12px;
+    margin: 3px 0;
+}
+
+.heading-icon {
+    font-size: 37px;
+    color: #581bb5;
+}
+
+/* DASHBOARD STATISTICS */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.stat-card,
+.content-card,
+.quick-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 5px 15px #36127c16;
+    border: 1px solid #eee5ff;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 15px 8px;
+}
+
+.stat-icon {
+    display: block;
+    font-size: 29px;
+    color: #5c19b5;
+}
+
+.stat-icon.green {
+    color: #15985b;
+}
+
+.stat-icon.pink {
+    color: #ef426d;
+}
+
+.stat-card p {
+    font-size: 12px;
+    margin: 2px;
+}
+
+.stat-card strong {
+    font-size: 20px;
+}
+
+/* QUICK ACTIONS */
+
+.dashboard-lower {
+    display: grid;
+    grid-template-columns: .85fr 1.15fr;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.quick-card {
+    padding: 17px;
+}
+
+.quick-card h3 {
+    margin: 0 0 12px;
+}
+
+.primary-btn {
+    background: linear-gradient(90deg, #5c19b7, #4c14a2);
+    color: white;
+    border: 0;
+    border-radius: 9px;
+    padding: 12px 18px;
+    font: 600 14px Poppins;
+    cursor: pointer;
+    box-shadow: 0 3px 8px #4e19a52b;
+}
+
+.primary-btn:hover {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+}
+
+.quick-card .primary-btn {
+    display: block;
+    width: 100%;
+    margin: 7px 0;
+    padding: 9px;
+}
+
+.promo-card {
+    border-radius: 14px;
+    padding: 25px 20px;
+    color: white;
+    background: linear-gradient(90deg, #27105d, #5a1bb5);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    min-height: 180px;
+}
+
+.promo-card h2 {
+    font-size: 19px;
+    margin: 0 0 6px;
+}
+
+.promo-card p {
+    margin: 0 0 14px;
+}
+
+.promo-card img {
+    width: 34%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #caa7ff;
+}
+
+.light-btn {
+    background: #6c2bc0;
+    color: white;
+    border: 0;
+    border-radius: 8px;
+    padding: 9px 15px;
+    cursor: pointer;
+    font: 600 12px Poppins;
+}
+
+/* PATIENT REGISTRATION */
+
+.form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(130px, 1fr);
+    gap: 22px;
+    align-items: center;
+}
+
+.patient-form {
+    padding: 22px;
+    max-width: 760px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.form-grid label {
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.form-grid input,
+.form-grid select {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font: 12px Poppins;
+    color: #5c4a85;
+    background: white;
+}
+
+.register-submit {
+    display: block;
+    margin: 20px auto 0;
+    min-width: 210px;
+}
+
+.heart-art {
+    font-size: 125px;
+    color: #6720b9;
+    text-align: center;
+    text-shadow: 12px 10px 0 #e4d2ff;
+    position: relative;
+}
+
+.heart-art span {
+    font-size: 42px;
+    color: white;
+    position: absolute;
+    left: 42%;
+    top: 39%;
+}
+
+.message {
+    color: #23824f;
+    text-align: center;
+}
+
+/* DIAGNOSIS */
+
+.diagnosis-card {
+    padding: 18px;
+    max-width: 850px;
+    position: relative;
+    z-index: 1;
+}
+
+.diagnosis-grid {
+    display: grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap: 15px;
+}
+
+fieldset {
+    border: 1px solid #eee5ff;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+legend {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+legend small {
+    font-weight: 400;
+}
+
+.symptom-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding: 10px 4px;
+}
+
+.symptom-list label {
+    font-size: 12px;
+}
+
+.symptom-list input {
+    accent-color: var(--purple);
+    margin-right: 7px;
+}
+
+.upload-box {
+    border: 2px dashed #a879ee;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 7px;
+    min-height: 140px;
+    text-align: center;
+    cursor: pointer;
+    padding: 12px;
+}
+
+.upload-icon {
+    font-size: 34px;
+    color: #5c19b5;
+}
+
+.upload-box small {
+    font-size: 10px;
+    color: #776a94;
+}
+
+.upload-box input {
+    max-width: 180px;
+    font-size: 10px;
+}
+
+.upload-box img {
+    display: none;
+    max-width: 110px;
+    max-height: 90px;
+    object-fit: contain;
+}
+
+.analyze-btn {
+    display: block;
+    margin: 15px auto 0;
+    width: min(100%, 400px);
+}
+
+.disclaimer {
+    text-align: center;
+    font-size: 10px;
+    color: #827995;
+    margin-bottom: 0;
+}
+
+.microscope-art {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 18%;
+    height: 50%;
+    object-fit: contain;
+    object-position: right bottom;
+    pointer-events: none;
+    opacity: .92;
+}
+
+/* RESULTS */
+
+.result-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 18px;
+    max-width: 900px;
+    align-items: center;
+}
+
+.smear-image {
+    width: 100%;
+    height: 205px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.result-details {
+    display: grid;
+    gap: 12px;
+}
+
+.result-alert,
+.result-note {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f3d8f6;
+}
+
+.result-alert h2 {
+    margin: 0;
+    color: #bf1f37;
+    font-size: 19px;
+}
+
+.result-alert strong {
+    font-size: 14px;
+}
+
+.result-alert > span {
+    background: #ed4261;
+    color: white;
+    font-size: 28px;
+    border-radius: 8px;
+    padding: 5px 13px;
+}
+
+.result-note {
+    background: #e2e8ff;
+}
+
+.result-note span {
+    font-size: 26px;
+    color: #16965b;
+}
+
+.result-note p {
+    margin: 0;
+    font-size: 13px;
+}
+
+.download-btn {
+    justify-self: center;
+    min-width: 190px;
+}
+
+/* PATIENT HISTORY TABLE */
+
+.table-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+thead {
+    background: #5115ad;
+    color: white;
+}
+
+th, td {
+    text-align: left;
+    padding: 13px 14px;
+    border-bottom: 1px solid #eee7fb;
+}
+
+tbody tr:hover {
+    background: #faf7ff;
+}
+
+.pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.positive {
+    background: #f9d6e1;
+    color: #bf2140;
+}
+
+.negative {
+    background: #ccefe0;
+    color: #176c4b;
+}
+
+.view-btn {
+    border: 1px solid #8544dd;
+    color: #5518ae;
+    background: white;
+    border-radius: 20px;
+    padding: 5px 12px;
+    cursor: pointer;
+}
+
+/* COLLAPSIBLE SIDEBAR */
+
+.collapsed .sidebar {
+    width: 70px;
+    padding: 20px 8px;
+}
+
+.collapsed .side-brand strong {
+    display: none;
+}
+
+.collapsed .nav-link {
+    font-size: 0;
+    text-align: center;
+    padding: 12px 5px;
+}
+
+.collapsed .nav-link span {
+    font-size: 19px;
+    width: auto;
+}
+
+.collapsed .side-brand {
+    height: 95px;
+}
+
+/* RESPONSIVE DESIGN */
+
+@media(max-width: 900px) {
+
+    .sidebar {
+        width: 185px;
+    }
+
+    .page {
+        padding: 22px 18px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-lower {
+        grid-template-columns: 1fr;
+    }
+
+    .microscope-art {
+        opacity: .2;
+        width: 28%;
+    }
+}
+
+@media(max-width: 650px) {
+
+    .sidebar {
+        width: 65px;
+        padding: 18px 7px;
+    }
+
+    .side-brand strong {
+        display: none;
+    }
+
+    .nav-link {
+        font-size: 0;
+        text-align: center;
+        padding: 12px 5px;
+    }
+
+    .nav-link span {
+        font-size: 19px;
+        width: auto;
+    }
+
+    .page {
+        padding: 18px 12px;
+    }
+
+    .page-heading h1 {
+        font-size: 20px;
+    }
+
+    .stats-grid {
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 12px 4px;
+    }
+
+    .form-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .heart-art {
+        display: none;
+    }
+
+    .form-grid,
+    .diagnosis-grid,
+    .result-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .smear-image {
+        height: 170px;
+        max-width: 240px;
+    }
+
+    .microscope-art {
+        display: none;
+    }
+
+    .promo-card img {
+        width: 28%;
+        height: 100px;
+    }
+
+    .topbar {
+        padding: 0 12px;
+    }
+}
