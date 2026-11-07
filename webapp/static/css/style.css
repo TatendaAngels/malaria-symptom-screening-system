@@ -515,7 +515,7 @@ body::before {
 .bubble-e { border-style: dashed; height: 34px; right: 27%; top: 73%; width: 34px; }
 
 .logo { font-family: "Space Grotesk", sans-serif; }
-.logo-mark { align-items: center; background: var(--pink-bright); border-radius: 8px; color: var(--violet-deep); display: inline-flex; height: 28px; justify-content: center; width: 28px; }
+.logo-mark { align-items: center; background: var(--pink-bright); border-radius: 8px; color: #28123d; display: inline-flex; height: 28px; justify-content: center; width: 28px; }
 .nav-links a.active { color: var(--mint-bright); }
 .inner-page .navbar { background: rgba(19, 11, 36, .72); backdrop-filter: blur(12px); }
 
