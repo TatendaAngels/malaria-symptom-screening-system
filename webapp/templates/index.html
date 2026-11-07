@@ -7,9 +7,9 @@
     <title>MalariaAI | Intelligent Health Screening</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+          href="{{ url_for('static', filename='css/style.css', v='4') }}">
 
-    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/script.js', v='8') }}" defer></script>
 </head>
 
 <body>
@@ -52,9 +52,10 @@
             <div class="hero-buttons">
                 <a href="{{ url_for('screening') }}" class="primary-button">Start Screening →</a>
 
-                <a href="#about" class="secondary-button">
-                    Explore MalariaAI
-                </a>
+                <button type="button" class="secondary-button assistant-trigger"
+                        aria-haspopup="dialog" aria-controls="assistant-modal">
+                    Malaria Assistance
+                </button>
             </div>
 
             <div class="trust-points">
@@ -200,7 +201,6 @@
 
     </section>
 
-
     <!-- Call to Action -->
     <section class="contact-section" id="contact">
 
@@ -247,6 +247,29 @@
         </p>
 
     </footer>
+
+    <!-- Malaria Assistant Modal -->
+    <div id="assistant-modal" class="modal-overlay" hidden>
+        <section class="modal-content" role="dialog" aria-modal="true"
+                 aria-labelledby="assistant-title" tabindex="-1">
+            <header class="modal-header">
+                <h2 id="assistant-title">🩺 Malaria Assistant</h2>
+                <button type="button" class="close-btn" aria-label="Close Malaria Assistant">×</button>
+            </header>
+
+            <div id="chat-history" class="chat-history" aria-live="polite" aria-relevant="additions">
+                <div class="chat-message bot-message">
+                    Hello! I’m the MalariaAI Assistant. Ask about symptoms, prevention, or treatment.
+                </div>
+            </div>
+
+            <form id="chat-form" class="chat-input-area">
+                <label class="visually-hidden" for="chat-input">Your question</label>
+                <input type="text" id="chat-input" placeholder="Type your question here..." autocomplete="off">
+                <button type="submit">Send</button>
+            </form>
+        </section>
+    </div>
 
 </body>
 </html>
