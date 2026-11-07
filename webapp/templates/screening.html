@@ -1,5 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Start Screening | MalariaAI</title><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"><script src="{{ url_for('static', filename='js/script.js') }}" defer></script></head>
-<body class="inner-page"><div class="bubble-field" aria-hidden="true"><span class="bubble bubble-a"></span><span class="bubble bubble-b"></span><span class="bubble bubble-c"></span><span class="bubble bubble-d"></span><span class="bubble bubble-e"></span></div><header class="navbar"><a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">+</span>Malaria<span>AI</span></a><nav class="nav-links"><a href="{{ url_for('home') }}">Home</a><a href="{{ url_for('about') }}">About</a><a href="{{ url_for('how_it_works') }}">How It Works</a><a href="{{ url_for('contact') }}">Contact</a></nav><a href="{{ url_for('screening') }}" class="nav-button active-button">Start Screening ↗</a></header><main class="page-main screening-main"><section class="screening-heading"><span class="eyebrow">STEP 01 / 03</span><h1>Let’s start with the basics.</h1><p>This quick check is for awareness only. It cannot diagnose malaria or replace a medical test.</p></section><form class="screening-form"><label>How old are you?<input type="number" min="1" max="120" placeholder="Your age"></label><label>How long have you felt unwell?<select><option>Select a timeframe</option><option>Less than 24 hours</option><option>1–3 days</option><option>More than 3 days</option></select></label><label>What is your temperature, if known?<input type="number" step="0.1" placeholder="°C"></label><button class="primary-button" type="button">Continue to symptoms →</button></form></main><footer><div class="footer-top"><strong>MalariaAI</strong><span>Private, preliminary, human-centered</span></div><p class="copyright">© 2026 MalariaAI. All rights reserved.</p></footer></body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screening - MalariaAI</title>
+    <!-- Assuming your girls' CSS is here -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Extra styles specifically for the form steps */
+        .step { display: none; }
+        .step.active { display: block; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; border-radius: 20px; cursor: pointer; border: none; background: #d1b3ff; color: #000; font-weight: bold; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .result-card { padding: 20px; border-radius: 12px; margin-top: 20px; }
+        .risk-urgent { background-color: #ffcccc; border: 2px solid red; }
+        .risk-higher { background-color: #ffe6cc; border: 2px solid orange; }
+        .risk-moderate { background-color: #fff4cc; border: 2px solid yellow; }
+        .risk-lower { background-color: #ccffcc; border: 2px solid green; }
+    </style>
+</head>
+<body>
+    <!-- Assume your navbar is here -->
+    
+    <main style="max-width: 600px; margin: 50px auto; padding: 20px; background: #1a1a2e; color: white; border-radius: 16px;">
+        <h2>AI Symptom Screening</h2>
+        <p>Answer a few questions to get a risk assessment.</p>
+
+        <form id="screeningForm">
+            <!-- STEP 1: Basics -->
+            <div class="step active" id="step1">
+                <h3>Step 1 of 3: Basic Info</h3>
+                <div class="form-group">
+                    <label>Age (years):</label>
+                    <input type="number" name="age" required min="0" max="120">
+                </div>
+                <div class="form-group">
+                    <label>Sex:</label>
+                    <select name="sex" required>
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Temperature (°C) - Optional:</label>
+                    <input type="number" step="0.1" name="temp_c" min="34" max="43" placeholder="e.g. 38.5">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn" onclick="nextStep(2)">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Symptoms -->
+            <div class="step" id="step2">
+                <h3>Step 2 of 3: Symptoms</h3>
+                <p>Check any that apply:</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <label><input type="checkbox" name="fever_now" value="1"> Fever now</label>
+                    <label><input type="checkbox" name="fever_48h" value="1"> Fever > 48h</label>
+                    <label><input type="checkbox" name="headache" value="1"> Headache</label>
+                    <label><input type="checkbox" name="chills" value="1"> Chills/Shivering</label>
+                    <label><input type="checkbox" name="vomiting" value="1"> Vomiting</label>
+                    <label><input type="checkbox" name="nausea" value="1"> Nausea</label>
+                    <label><input type="checkbox" name="muscle_pain" value="1"> Muscle pain</label>
+                    <label><input type="checkbox" name="joint_pain" value="1"> Joint pain</label>
+                    <label><input type="checkbox" name="prostration" value="1"> Extreme weakness</label>
+                    <label><input type="checkbox" name="loss_appetite" value="1"> Loss of appetite</label>
+                    <label><input type="checkbox" name="diarrhea" value="1"> Diarrhea</label>
+                    <label><input type="checkbox" name="abdominal_pain" value="1"> Stomach pain</label>
+                    <label><input type="checkbox" name="cough" value="1"> Cough</label>
+                    <label><input type="checkbox" name="runny_nose" value="1"> Runny nose</label>
+                </div>
+
+                <h4 style="margin-top: 20px; color: #ff9999;">Danger Signs</h4>
+                <p style="font-size: 0.9em; margin-bottom: 10px;">Check these immediately if present:</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <label><input type="checkbox" name="convulsions" value="1"> Convulsions/Fits</label>
+                    <label><input type="checkbox" name="confusion" value="1"> Confusion</label>
+                    <label><input type="checkbox" name="resp_distress" value="1"> Difficulty breathing</label>
+                    <label><input type="checkbox" name="bleeding" value="1"> Unusual bleeding</label>
+                    <label><input type="checkbox" name="jaundice" value="1"> Yellow eyes/skin</label>
+                    <label><input type="checkbox" name="dark_urine" value="1"> Dark urine</label>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn" onclick="nextStep(1)">← Back</button>
+                    <button type="button" class="btn" onclick="submitForm()">Get Result →</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Result -->
+            <div class="step" id="step3">
+                <h3>Step 3 of 3: Your Result</h3>
+                <div id="resultContainer"></div>
+                <div class="btn-group">
+                    <button type="button" class="btn" onclick="location.reload()">Start Over</button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        // Step Navigation
+        function nextStep(stepNumber) {
+            // Basic HTML5 validation for step 1
+            if (stepNumber === 2) {
+                const age = document.querySelector('input[name="age"]').value;
+                if (!age) { alert("Please enter an age."); return; }
+            }
+
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+        }
+
+        // Submit Data to Flask API
+        async function submitForm() {
+            const form = document.getElementById('screeningForm');
+            const formData = new FormData(form);
+            const data = {};
+
+            // Convert FormData to JSON
+            formData.forEach((value, key) => {
+                data[key] = value === "1" ? 1 : value; // Ensure checkboxes are integers
+            });
+            
+            // If checkboxes were unchecked, they are missing from FormData. 
+            // Python handles missing as 0, but let's be safe.
+
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    alert("Error: " + (result.error || "Unknown error"));
+                    return;
+                }
+
+                // Show Step 3
+                nextStep(3);
+                
+                // Render Result
+                const container = document.getElementById('resultContainer');
+                let riskClass = `risk-${result.risk_level}`;
+                
+                let factorsHtml = result.main_factors.length > 0 
+                    ? `<p><strong>Main reasons:</strong> ${result.main_factors.join(", ")}</p>` 
+                    : "";
+                    
+                let dangerHtml = result.danger_signs.length > 0
+                    ? `<p style="color: red;"><strong>Danger Signs Detected:</strong> ${result.danger_signs.join(", ")}. Please seek immediate medical help!</p>`
+                    : "";
+
+                container.innerHTML = `
+                    <div class="result-card ${riskClass}">
+                        <h3 style="text-transform: capitalize;">Risk Level: ${result.risk_level}</h3>
+                        ${dangerHtml}
+                        <p><strong>Advice:</strong> ${result.advice}</p>
+                        ${factorsHtml}
+                        <p style="font-size: 0.8em; margin-top: 15px; color: #555;">${result.disclaimer}</p>
+                    </div>
+                `;
+
+            } catch (error) {
+                alert("Failed to connect to the server. Check your terminal.");
+            }
+        }
+    </script>
+</body>
 </html>
