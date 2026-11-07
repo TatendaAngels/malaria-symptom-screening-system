@@ -7,7 +7,7 @@ MalariaAI is a web-based screening tool designed to assess the risk of malaria b
 ## Team
 *CS 414: Artificial Intelligence and Intelligent Systems - Group Project*
 - **Tatenda** (Backend / ML)
-- **Wilford** (Backend / Placeholder setup)
+- **Wilford** (Backend / ML)
 - **Modester** (Frontend)
 - **trae-code** (Frontend)
 
