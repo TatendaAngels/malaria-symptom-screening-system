@@ -1,0 +1,41 @@
+{
+  "label": "smear",
+  "n": 268,
+  "positives": 212,
+  "model_comparison": {
+    "Baseline (always 'malaria')": {
+      "roc_auc": 0.5,
+      "roc_auc_sd": 0.0,
+      "pr_auc": 0.7910552061495457,
+      "brier": 0.16531358321974193
+    },
+    "Logistic regression": {
+      "roc_auc": 0.6141982113493741,
+      "roc_auc_sd": 0.08982702016779362,
+      "pr_auc": 0.8519526052627312,
+      "brier": 0.23884800730476904
+    },
+    "Random forest": {
+      "roc_auc": 0.6534689083526294,
+      "roc_auc_sd": 0.0680317982145314,
+      "pr_auc": 0.8831469590021375,
+      "brier": 0.17906095228194294
+    },
+    "Gradient boosting": {
+      "roc_auc": 0.5934373636699218,
+      "roc_auc_sd": 0.08896790268908812,
+      "pr_auc": 0.8440685553721146,
+      "brier": 0.17509761209650784
+    }
+  },
+  "moderate_or_higher": {
+    "threshold": 0.4646056252840915,
+    "sensitivity": 0.9009433962264151,
+    "specificity": 0.16071428571428573
+  },
+  "higher": {
+    "threshold": 0.7587129871052765,
+    "sensitivity": 0.3632075471698113,
+    "specificity": 0.8035714285714286
+  }
+}
