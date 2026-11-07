@@ -155,3 +155,47 @@ if (assistantForm) {
         };
     }
 }
+
+const contactForm = document.getElementById("contact-form");
+
+if (contactForm) {
+    const contactStatus = document.getElementById("contact-status");
+    const submitButton = contactForm.querySelector('button[type="submit"]');
+
+    contactForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        contactStatus.textContent = "";
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(contactForm.action, {
+                method: "POST",
+                body: new FormData(contactForm)
+            });
+            const contentType = response.headers.get("content-type") || "";
+            const result = contentType.includes("application/json")
+                ? await response.json()
+                : null;
+
+            if (!response.ok) {
+                throw new Error(
+                    (result && result.message) ||
+                    `Failed to send email (HTTP ${response.status}). Please try again later.`
+                );
+            }
+
+            if (!result || result.status !== "success") {
+                throw new Error("The server returned an invalid response. Please try again later.");
+            }
+
+            contactForm.reset();
+            contactStatus.textContent = "Message sent successfully! We’ll get back to you soon.";
+        } catch (error) {
+            contactStatus.textContent = error instanceof TypeError
+                ? "Network error. Please check your connection and try again."
+                : error.message;
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+}

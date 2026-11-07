@@ -1,5 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Contact | MalariaAI</title><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"><script src="{{ url_for('static', filename='js/script.js') }}" defer></script></head>
-<body class="inner-page"><div class="bubble-field" aria-hidden="true"><span class="bubble bubble-a"></span><span class="bubble bubble-b"></span><span class="bubble bubble-c"></span><span class="bubble bubble-d"></span><span class="bubble bubble-e"></span></div><header class="navbar"><a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">+</span>Malaria<span>AI</span></a><nav class="nav-links"><a href="{{ url_for('home') }}">Home</a><a href="{{ url_for('about') }}">About</a><a href="{{ url_for('how_it_works') }}">How It Works</a><a class="active" href="{{ url_for('contact') }}">Contact</a></nav><a href="{{ url_for('screening') }}" class="nav-button">Start Screening ↗</a></header><main class="page-main"><section class="page-intro"><span class="eyebrow">WE’RE HERE TO HELP</span><h1>Questions are a <span>healthy start.</span></h1><p>Need to understand the experience, share feedback, or ask about a screening result? Send us a note and our team will point you in the right direction.</p></section><section class="contact-grid"><div class="contact-note"><span class="panel-kicker">REACH OUT</span><h2>Let’s keep the conversation useful.</h2><p>For urgent or worsening symptoms, contact a qualified healthcare professional or local emergency service directly.</p><a href="mailto:hello@malariaai.example">hello@malariaai.example ↗</a></div><form class="message-form"><label>Your name<input type="text" placeholder="Name"></label><label>Your message<textarea rows="5" placeholder="How can we help?"></textarea></label><button class="primary-button" type="button">Send message →</button></form></section></main><footer><div class="footer-top"><strong>MalariaAI</strong><span>Intelligent health screening</span></div><p class="copyright">© 2026 MalariaAI. All rights reserved.</p></footer></body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact | MalariaAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js', v='11') }}" defer></script>
+</head>
+<body class="inner-page">
+    <div class="bubble-field" aria-hidden="true">
+        <span class="bubble bubble-a"></span>
+        <span class="bubble bubble-b"></span>
+        <span class="bubble bubble-c"></span>
+        <span class="bubble bubble-d"></span>
+        <span class="bubble bubble-e"></span>
+    </div>
+    <header class="navbar">
+        <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">+</span>Malaria<span>AI</span></a>
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('how_it_works') }}">How It Works</a>
+            <a class="active" href="{{ url_for('contact') }}">Contact</a>
+        </nav>
+        <a href="{{ url_for('screening') }}" class="nav-button">Start Screening ↗</a>
+    </header>
+    <main class="page-main">
+        <section class="page-intro">
+            <span class="eyebrow">WE’RE HERE TO HELP</span>
+            <h1>Questions are a <span>healthy start.</span></h1>
+            <p>Need to understand the experience, share feedback, or ask about a screening result? Send us a note and our team will point you in the right direction.</p>
+        </section>
+        <section class="contact-grid">
+            <div class="contact-note">
+                <span class="panel-kicker">REACH OUT</span>
+                <h2>Let’s keep the conversation useful.</h2>
+                <p>For urgent or worsening symptoms, contact a qualified healthcare professional or local emergency service directly.</p>
+                <a href="mailto:hello@malariaai.example">hello@malariaai.example ↗</a>
+            </div>
+            <form class="message-form" id="contact-form" action="{{ url_for('contact') }}" method="post">
+                <label>Your name
+                    <input type="text" name="name" placeholder="Name" maxlength="120" required>
+                </label>
+                <label>Email
+                    <input type="email" name="email" placeholder="Email" maxlength="254" required>
+                </label>
+                <label>Your message
+                    <textarea name="message" rows="5" maxlength="5000" placeholder="How can we help?" required></textarea>
+                </label>
+                <p id="contact-status" role="status" aria-live="polite"></p>
+                <button class="primary-button" type="submit">Send message →</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-top">
+            <strong>MalariaAI</strong>
+            <span>Intelligent health screening</span>
+        </div>
+        <p class="copyright">© 2026 MalariaAI. All rights reserved.</p>
+    </footer>
+</body>
 </html>
