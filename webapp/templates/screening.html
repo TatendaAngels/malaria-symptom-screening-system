@@ -51,6 +51,20 @@
             color: #ffffff;
             font-weight: 500;
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            /* Make the symptom grid single-column on small phones */
+            div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+            /* Adjust padding for smaller screens */
+            main {
+                margin: 20px auto !important;
+                padding: 15px !important;
+            }
+            h2 { font-size: 1.5em; }
+        }
     </style>
 </head>
 <body>

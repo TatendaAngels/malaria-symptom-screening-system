@@ -52,5 +52,4 @@ def api_predict():
         return jsonify({"error": "An internal server error occurred."}), 500
 
 if __name__ == "__main__":
-    # Run the app (debug=True is great for development)
-    app.run(debug=True)
+    app.run(debug=False)
