@@ -1,5 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>How It Works | MalariaAI</title><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"><script src="{{ url_for('static', filename='js/script.js') }}" defer></script></head>
-<body class="inner-page"><div class="bubble-field" aria-hidden="true"><span class="bubble bubble-a"></span><span class="bubble bubble-b"></span><span class="bubble bubble-c"></span><span class="bubble bubble-d"></span><span class="bubble bubble-e"></span></div><header class="navbar"><a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">+</span>Malaria<span>AI</span></a><nav class="nav-links"><a href="{{ url_for('home') }}">Home</a><a href="{{ url_for('about') }}">About</a><a class="active" href="{{ url_for('how_it_works') }}">How It Works</a><a href="{{ url_for('contact') }}">Contact</a></nav><a href="{{ url_for('screening') }}" class="nav-button">Start Screening ↗</a></header><main class="page-main"><section class="page-intro"><span class="eyebrow">THREE SIMPLE MOVES</span><h1>From symptoms to a <span>clearer next step.</span></h1><p>The flow is short on purpose. You share what you know, review a preliminary indication, and get practical guidance for what comes next.</p></section><section class="timeline"><div class="timeline-step"><b>01</b><div><h2>Tell us about you</h2><p>Share basic information such as age and recent context so the screening has the right starting point.</p></div></div><div class="timeline-step"><b>02</b><div><h2>Choose your symptoms</h2><p>Use plain-language prompts to describe how you have been feeling and when symptoms began.</p></div></div><div class="timeline-step"><b>03</b><div><h2>Read your guidance</h2><p>Review a preliminary risk indication and the recommended next step. Seek medical care if you feel unwell.</p></div></div></section><div class="page-cta"><p>Ready to make your first check-in?</p><a href="{{ url_for('screening') }}" class="primary-button">Begin Screening →</a></div></main><footer><div class="footer-top"><strong>MalariaAI</strong><span>Intelligent health screening</span></div><p class="copyright">© 2026 MalariaAI. All rights reserved.</p></footer></body>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>How It Works | MalariaAI</title><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='5') }}"><script src="{{ url_for('static', filename='js/script.js', v='13') }}" defer></script></head>
+<body class="inner-page">
+    <div class="bubble-field" aria-hidden="true"><span class="bubble bubble-a"></span><span class="bubble bubble-b"></span><span class="bubble bubble-c"></span><span class="bubble bubble-d"></span><span class="bubble bubble-e"></span></div>
+    <header class="navbar">
+        <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">+</span>Malaria<span>AI</span></a>
+        <button class="menu-toggle" type="button" aria-label="Open navigation menu"
+                aria-controls="nav-links" aria-expanded="false">
+            <span aria-hidden="true">☰</span>
+        </button>
+        <nav class="nav-links" id="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('about') }}">About</a>
+            <a class="active" href="{{ url_for('how_it_works') }}">How It Works</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('screening') }}" class="nav-button mobile-only">Start Screening ↗</a>
+        </nav>
+        <a href="{{ url_for('screening') }}" class="nav-button desktop-only">Start Screening ↗</a>
+    </header>
+    <main class="page-main"><section class="page-intro"><span class="eyebrow">THREE SIMPLE MOVES</span><h1>From symptoms to a <span>clearer next step.</span></h1><p>The flow is short on purpose. You share what you know, review a preliminary indication, and get practical guidance for what comes next.</p></section><section class="timeline"><div class="timeline-step"><b>01</b><div><h2>Tell us about you</h2><p>Share basic information such as age and recent context so the screening has the right starting point.</p></div></div><div class="timeline-step"><b>02</b><div><h2>Choose your symptoms</h2><p>Use plain-language prompts to describe how you have been feeling and when symptoms began.</p></div></div><div class="timeline-step"><b>03</b><div><h2>Read your guidance</h2><p>Review a preliminary risk indication and the recommended next step. Seek medical care if you feel unwell.</p></div></div></section><div class="page-cta"><p>Ready to make your first check-in?</p><a href="{{ url_for('screening') }}" class="primary-button">Begin Screening →</a></div></main>
+    <footer><div class="footer-top"><strong>MalariaAI</strong><span>Intelligent health screening</span></div><p class="copyright">© 2026 MalariaAI. All rights reserved.</p></footer>
+</body>
 </html>

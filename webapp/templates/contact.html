@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact | MalariaAI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/script.js', v='11') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='5') }}">
+    <script src="{{ url_for('static', filename='js/script.js', v='13') }}" defer></script>
 </head>
 <body class="inner-page">
     <div class="bubble-field" aria-hidden="true">
@@ -17,13 +17,18 @@
     </div>
     <header class="navbar">
         <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">+</span>Malaria<span>AI</span></a>
-        <nav class="nav-links">
+        <button class="menu-toggle" type="button" aria-label="Open navigation menu"
+                aria-controls="nav-links" aria-expanded="false">
+            <span aria-hidden="true">☰</span>
+        </button>
+        <nav class="nav-links" id="nav-links">
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('about') }}">About</a>
             <a href="{{ url_for('how_it_works') }}">How It Works</a>
             <a class="active" href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('screening') }}" class="nav-button mobile-only">Start Screening ↗</a>
         </nav>
-        <a href="{{ url_for('screening') }}" class="nav-button">Start Screening ↗</a>
+        <a href="{{ url_for('screening') }}" class="nav-button desktop-only">Start Screening ↗</a>
     </header>
     <main class="page-main">
         <section class="page-intro">
