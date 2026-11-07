@@ -16,11 +16,41 @@
         .btn-group { margin-top: 20px; display: flex; gap: 10px; }
         .btn { padding: 10px 20px; border-radius: 20px; cursor: pointer; border: none; background: #d1b3ff; color: #000; font-weight: bold; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .result-card { padding: 20px; border-radius: 12px; margin-top: 20px; }
-        .risk-urgent { background-color: #ffcccc; border: 2px solid red; }
-        .risk-higher { background-color: #ffe6cc; border: 2px solid orange; }
-        .risk-moderate { background-color: #fff4cc; border: 2px solid yellow; }
-        .risk-lower { background-color: #ccffcc; border: 2px solid green; }
+        /* Premium Result Card Styles */
+        .result-card { 
+            padding: 25px; 
+            border-radius: 16px; 
+            margin-top: 20px; 
+            background-color: #2a2a40; /* Darker purple/grey card */
+            border-left: 6px solid; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            color: #f0f0f0;
+        }
+        
+        /* Color-coded borders for the risk levels */
+        .risk-urgent { border-left-color: #ff4d4d; }
+        .risk-higher { border-left-color: #ffaa00; }
+        .risk-moderate { border-left-color: #ffdd00; }
+        .risk-lower { border-left-color: #00cc44; }
+
+        .result-card h3 { 
+            margin-top: 0; 
+            font-size: 1.4em; 
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        
+        .result-card p { 
+            line-height: 1.6; 
+            margin-bottom: 12px;
+            color: #cccccc; /* Light grey for readability */
+        }
+
+        .result-card .advice-text {
+            font-size: 1.1em;
+            color: #ffffff;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -150,23 +180,25 @@
                 
                 // Render Result
                 const container = document.getElementById('resultContainer');
-                let riskClass = `risk-${result.risk_level}`;
-                
+
+                // Build the result HTML
                 let factorsHtml = result.main_factors.length > 0 
                     ? `<p><strong>Main reasons:</strong> ${result.main_factors.join(", ")}</p>` 
                     : "";
                     
                 let dangerHtml = result.danger_signs.length > 0
-                    ? `<p style="color: red;"><strong>Danger Signs Detected:</strong> ${result.danger_signs.join(", ")}. Please seek immediate medical help!</p>`
+                    ? `<p style="color: #ff4d4d; font-weight: bold;">🚨 Danger Signs Detected: ${result.danger_signs.join(", ")}. Please seek immediate medical help!</p>`
                     : "";
 
                 container.innerHTML = `
-                    <div class="result-card ${riskClass}">
-                        <h3 style="text-transform: capitalize;">Risk Level: ${result.risk_level}</h3>
+                    <div class="result-card risk-${result.risk_level}">
+                        <h3>Risk Level: <span style="text-transform: capitalize;">${result.risk_level}</span></h3>
                         ${dangerHtml}
-                        <p><strong>Advice:</strong> ${result.advice}</p>
+                        <p class="advice-text">💡 ${result.advice}</p>
                         ${factorsHtml}
-                        <p style="font-size: 0.8em; margin-top: 15px; color: #555;">${result.disclaimer}</p>
+                        <p style="font-size: 0.85em; margin-top: 20px; padding-top: 15px; border-top: 1px solid #444; color: #999;">
+                            ⚠️ ${result.disclaimer}
+                        </p>
                     </div>
                 `;
 
