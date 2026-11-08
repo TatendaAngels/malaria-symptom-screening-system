@@ -1,10 +1,10 @@
 import os
 import re
 import sys
+import requests
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request
-from flask_mail import Mail, Message
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().with_name(".env"))
@@ -15,13 +15,6 @@ from model.predict import predict_risk
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'gumbochumatatenda1@gmail.com'
-app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD', '')
-app.config['MAIL_DEFAULT_SENDER'] = 'gumbochumatatenda1@gmail.com'
-mail = Mail(app)
 
 # --- Page Routes ---
 
@@ -62,24 +55,37 @@ def contact():
     ):
         return jsonify({"status": "error", "message": "Please provide a valid name, email, and message."}), 400
 
-    if not app.config["MAIL_PASSWORD"]:
-        app.logger.error("Contact form email is unavailable because EMAIL_PASSWORD is not configured.")
-        return jsonify({"status": "error", "message": "The contact form is temporarily unavailable. Please try again later."}), 503
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+    if not RESEND_API_KEY:
+        app.logger.error("Contact form email unavailable: RESEND_API_KEY not configured.")
+        return jsonify({"status": "error", "message": "The contact form is temporarily unavailable."}), 503
 
-    msg = Message(
-        subject=f"New MalariaAI Contact Form Message from {name}",
-        recipients=["gumbochumatatenda1@gmail.com"],
-        reply_to=user_email,
-        body=f"Name: {name}\nEmail: {user_email}\n\nMessage:\n{message_body}",
-    )
-
+    # Send email via Resend API (HTTPS, works on Render)
     try:
-        mail.send(msg)
-    except Exception:
-        app.logger.exception("Failed to send MalariaAI contact form email.")
-        return jsonify({"status": "error", "message": "We could not send your message. Please try again later."}), 500
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "from": "onboarding@resend.dev",
+                "to": ["gumbochumatatenda1@gmail.com"],
+                "subject": f"New MalariaAI Message from {name}",
+                "text": f"Name: {name}\nEmail: {user_email}\n\nMessage:\n{message_body}"
+            },
+            timeout=10 # Good practice to prevent hanging
+        )
 
-    return jsonify({"status": "success", "message": "Email sent successfully!"}), 200
+        if response.status_code not in (200, 201):
+            app.logger.error(f"Resend API error: {response.text}")
+            return jsonify({"status": "error", "message": "We could not send your message."}), 500
+
+        return jsonify({"status": "success", "message": "Email sent successfully!"}), 200
+
+    except Exception as e:
+        app.logger.error(f"Connection error: {e}")
+        return jsonify({"status": "error", "message": "Server connection error."}), 500
 
 # --- API Route ---
 
