@@ -1,10 +1,11 @@
 import pytest
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 # Ensure the root folder is in the path so we can import webapp
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from webapp.app import app, mail
+from webapp.app import app
 
 @pytest.fixture
 def client():
@@ -41,8 +42,8 @@ def test_contact_form_rejects_invalid_input(client):
     assert response.status_code == 400
     assert response.get_json()["status"] == "error"
 
-def test_contact_form_requires_email_password(client, monkeypatch):
-    monkeypatch.setitem(app.config, "MAIL_PASSWORD", None)
+def test_contact_form_requires_resend_api_key(client, monkeypatch):
+    monkeypatch.delenv("RESEND_API_KEY", raising=False)
     response = client.post('/contact', data={
         "name": "Test User",
         "email": "test@example.com",
@@ -53,10 +54,14 @@ def test_contact_form_requires_email_password(client, monkeypatch):
     assert response.get_json()["status"] == "error"
 
 def test_contact_form_sends_email(client, monkeypatch):
-    sent_messages = []
-    monkeypatch.setitem(app.config, "MAIL_PASSWORD", "test-password")
-    monkeypatch.setattr(mail, "send", sent_messages.append)
+    monkeypatch.setenv("RESEND_API_KEY", "test-api-key")
+    sent_requests = []
 
+    def send_request(*args, **kwargs):
+        sent_requests.append((args, kwargs))
+        return SimpleNamespace(status_code=200, text="")
+
+    monkeypatch.setattr("webapp.app.requests.post", send_request)
     response = client.post('/contact', data={
         "name": "Test User",
         "email": "test@example.com",
@@ -65,18 +70,20 @@ def test_contact_form_sends_email(client, monkeypatch):
 
     assert response.status_code == 200
     assert response.get_json()["status"] == "success"
-    assert len(sent_messages) == 1
-    assert sent_messages[0].recipients == ["gumbochumatatenda1@gmail.com"]
-    assert sent_messages[0].reply_to == "test@example.com"
-    assert "Please contact me." in sent_messages[0].body
+    assert len(sent_requests) == 1
+    args, kwargs = sent_requests[0]
+    assert args == ("https://api.resend.com/emails",)
+    assert kwargs["headers"]["Authorization"] == "Bearer test-api-key"
+    assert kwargs["json"]["to"] == ["gumbochumatatenda1@gmail.com"]
+    assert "Please contact me." in kwargs["json"]["text"]
 
-def test_contact_form_reports_mail_failure(client, monkeypatch):
-    monkeypatch.setitem(app.config, "MAIL_PASSWORD", "test-password")
+def test_contact_form_reports_resend_failure(client, monkeypatch):
+    monkeypatch.setenv("RESEND_API_KEY", "test-api-key")
 
-    def fail_to_send(_message):
-        raise RuntimeError("SMTP failure")
-
-    monkeypatch.setattr(mail, "send", fail_to_send)
+    monkeypatch.setattr(
+        "webapp.app.requests.post",
+        lambda *args, **kwargs: SimpleNamespace(status_code=500, text="Resend error"),
+    )
     response = client.post('/contact', data={
         "name": "Test User",
         "email": "test@example.com",
@@ -85,7 +92,7 @@ def test_contact_form_reports_mail_failure(client, monkeypatch):
 
     assert response.status_code == 500
     assert response.get_json()["status"] == "error"
-    assert "SMTP failure" not in response.get_json()["message"]
+    assert "Resend error" not in response.get_json()["message"]
 
 def test_api_valid_input(client):
     """Test the API with a valid patient."""

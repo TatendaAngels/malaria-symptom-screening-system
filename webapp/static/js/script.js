@@ -239,3 +239,69 @@ if (menuToggle && navLinks) {
         }
     });
 }
+
+const mosquitoCanvas = document.getElementById("mosquito-canvas");
+
+if (mosquitoCanvas) {
+    const context = mosquitoCanvas.getContext("2d");
+
+    if (context) {
+        let width = 0;
+        let height = 0;
+        let animationFrame;
+
+        function resizeMosquitoCanvas() {
+            const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+            width = window.innerWidth;
+            height = window.innerHeight;
+            mosquitoCanvas.width = width * pixelRatio;
+            mosquitoCanvas.height = height * pixelRatio;
+            context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        }
+
+        const mosquitoes = Array.from({ length: 15 }, () => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            size: Math.random() * 2 + 1,
+            speedX: Math.random() * 2 - 1,
+            speedY: Math.random() * 2 - 1
+        }));
+
+        function animateMosquitoes() {
+            context.clearRect(0, 0, width, height);
+
+            mosquitoes.forEach(mosquito => {
+                mosquito.x += mosquito.speedX;
+                mosquito.y += mosquito.speedY;
+
+                if (mosquito.x > width || mosquito.x < 0) mosquito.speedX *= -1;
+                if (mosquito.y > height || mosquito.y < 0) mosquito.speedY *= -1;
+
+                context.fillStyle = "rgba(209, 179, 255, 0.4)";
+                context.beginPath();
+                context.arc(mosquito.x, mosquito.y, mosquito.size, 0, Math.PI * 2);
+                context.fill();
+
+                context.beginPath();
+                context.moveTo(mosquito.x, mosquito.y);
+                context.lineTo(mosquito.x - mosquito.size * 2, mosquito.y - mosquito.size * 2);
+                context.lineTo(mosquito.x + mosquito.size * 2, mosquito.y - mosquito.size * 2);
+                context.fillStyle = "rgba(209, 179, 255, 0.2)";
+                context.fill();
+            });
+
+            animationFrame = window.requestAnimationFrame(animateMosquitoes);
+        }
+
+        resizeMosquitoCanvas();
+        window.addEventListener("resize", resizeMosquitoCanvas);
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                window.cancelAnimationFrame(animationFrame);
+            } else {
+                animationFrame = window.requestAnimationFrame(animateMosquitoes);
+            }
+        });
+        animateMosquitoes();
+    }
+}

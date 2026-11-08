@@ -7,12 +7,13 @@
     <title>MalariaAI | Intelligent Health Screening</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css', v='5') }}">
+          href="{{ url_for('static', filename='css/style.css', v='8') }}">
 
-    <script src="{{ url_for('static', filename='js/script.js', v='13') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/script.js', v='15') }}" defer></script>
 </head>
 
 <body>
+    <canvas id="mosquito-canvas" aria-hidden="true"></canvas>
 
     <!-- Navigation -->
     <header class="navbar">
@@ -44,7 +45,7 @@
                 ✦ INTELLIGENT HEALTH SCREENING
             </div>
 
-            <h1>
+            <h1 class="hero-title">
                 Smarter Malaria Screening.
                 <span>Healthier Tomorrow.</span>
             </h1>
@@ -75,21 +76,20 @@
 
         <!-- Medical Illustration -->
         <div class="hero-visual">
-
             <div class="orbit">
                 <div class="medical-icon">✚</div>
             </div>
 
-            <div class="floating-card card-one">
-                <strong>AI-Powered</strong>
-                Intelligent screening support
+            <div class="orbit-container">
+                <div class="floating-card card-one">
+                    <strong>AI-Powered</strong>
+                    Intelligent screening support
+                </div>
+                <div class="floating-card card-two">
+                    <strong>Health First</strong>
+                    Guidance for informed action
+                </div>
             </div>
-
-            <div class="floating-card card-two">
-                <strong>Health First</strong>
-                Guidance for informed action
-            </div>
-
         </div>
 
     </section>
