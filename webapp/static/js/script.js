@@ -244,13 +244,33 @@ const mosquitoCanvas = document.getElementById("mosquito-canvas");
 
 if (mosquitoCanvas) {
     const context = mosquitoCanvas.getContext("2d");
+    const heroTitle = document.querySelector(".hero-title");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (context) {
+    if (context && heroTitle && !reducedMotion) {
         let width = 0;
         let height = 0;
         let animationFrame;
+        let formationTargets = [];
+        let formationMosquitoes = [];
+        let formationStartedAt = 0;
+        let titleRevealed = false;
+        let hiddenAt = null;
+        let titleIsInView = false;
+        let formationIsActive = false;
+        let nextFormationAt = 0;
+        const formationDuration = 7600;
+        const formationInterval = 20000;
 
-        function resizeMosquitoCanvas() {
+        const ambientMosquitoes = Array.from({ length: 15 }, () => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            size: Math.random() * 2 + 1,
+            speedX: Math.random() * 2 - 1,
+            speedY: Math.random() * 2 - 1
+        }));
+
+        function resizeCanvas() {
             const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
             width = window.innerWidth;
             height = window.innerHeight;
@@ -259,18 +279,121 @@ if (mosquitoCanvas) {
             context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
         }
 
-        const mosquitoes = Array.from({ length: 15 }, () => ({
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
-            size: Math.random() * 2 + 1,
-            speedX: Math.random() * 2 - 1,
-            speedY: Math.random() * 2 - 1
-        }));
+        function collectTextTargets() {
+            const targets = [];
+            const titleStyle = window.getComputedStyle(heroTitle);
+            const fontSize = parseFloat(titleStyle.fontSize);
+            const scratchCanvas = document.createElement("canvas");
+            const scratchContext = scratchCanvas.getContext("2d", { willReadFrequently: true });
 
-        function animateMosquitoes() {
-            context.clearRect(0, 0, width, height);
+            if (!scratchContext) return targets;
 
-            mosquitoes.forEach(mosquito => {
+            scratchCanvas.width = Math.ceil(fontSize * 2);
+            scratchCanvas.height = Math.ceil(fontSize * 1.6);
+            scratchContext.font = titleStyle.font;
+            scratchContext.textBaseline = "alphabetic";
+            const baseline = fontSize * 1.2;
+            const sampleStep = Math.max(2, Math.round(fontSize / 24));
+
+            heroTitle.querySelectorAll(".hero-title-primary, .hero-title-highlight").forEach(block => {
+                const textNode = block.firstChild;
+                if (!textNode || textNode.nodeType !== Node.TEXT_NODE) return;
+
+                const blockStyle = window.getComputedStyle(block);
+                const range = document.createRange();
+
+                for (let index = 0; index < textNode.textContent.length; index += 1) {
+                    const character = textNode.textContent[index];
+                    if (/\s/.test(character)) continue;
+
+                    range.setStart(textNode, index);
+                    range.setEnd(textNode, index + 1);
+                    const characterBounds = range.getBoundingClientRect();
+                    if (!characterBounds.width || !characterBounds.height) continue;
+
+                    scratchContext.clearRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+                    scratchContext.fillText(character, 0, baseline);
+                    const metrics = scratchContext.measureText(character);
+                    if (!metrics.width) continue;
+
+                    const pixels = scratchContext.getImageData(
+                        0, 0, scratchCanvas.width, scratchCanvas.height
+                    ).data;
+                    const inkPixels = [];
+
+                    for (let y = 0; y < scratchCanvas.height; y += sampleStep) {
+                        for (let x = 0; x < scratchCanvas.width; x += sampleStep) {
+                            if (pixels[(y * scratchCanvas.width + x) * 4 + 3] > 64) {
+                                inkPixels.push({ x, y });
+                            }
+                        }
+                    }
+
+                    const targetCount = Math.min(12, Math.max(3, Math.round(inkPixels.length / 3)));
+                    const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.75;
+                    const descent = metrics.actualBoundingBoxDescent || fontSize * 0.2;
+                    const inkHeight = ascent + descent;
+                    const lineOffset = Math.max(0, (characterBounds.height - inkHeight) / 2);
+                    const inkTop = baseline - ascent;
+
+                    for (let count = 0; count < targetCount && inkPixels.length; count += 1) {
+                        const pixel = inkPixels.splice(
+                            Math.floor(Math.random() * inkPixels.length), 1
+                        )[0];
+                        targets.push({
+                            x: characterBounds.left + (pixel.x / metrics.width) * characterBounds.width,
+                            y: characterBounds.top + lineOffset + pixel.y - inkTop,
+                            color: blockStyle.color
+                        });
+                    }
+                }
+            });
+
+            return targets;
+        }
+
+        function createFormationMosquitoes() {
+            formationTargets = collectTextTargets();
+            const titleBounds = heroTitle.getBoundingClientRect();
+
+            formationMosquitoes = formationTargets.map(target => ({
+                x: titleBounds.left - 100 + Math.random() * (titleBounds.width + 200),
+                y: titleBounds.top - 100 + Math.random() * (titleBounds.height + 200),
+                targetX: target.x,
+                targetY: target.y,
+                color: target.color,
+                size: 1.7 + Math.random() * 0.7,
+                delay: Math.random() * 700,
+                phase: Math.random() * Math.PI * 2,
+                curve: (Math.random() * 2 - 1) * Math.min(
+                    Math.hypot(target.x - (titleBounds.left + titleBounds.width / 2),
+                        target.y - (titleBounds.top + titleBounds.height / 2)) * 0.12,
+                    52
+                )
+            }));
+
+            return formationMosquitoes.length > 0;
+        }
+
+        function beginFormation(startedAt = performance.now()) {
+            if (!createFormationMosquitoes()) return;
+
+            formationStartedAt = startedAt;
+            nextFormationAt = startedAt + formationInterval;
+            titleRevealed = false;
+            formationIsActive = true;
+            heroTitle.classList.remove("is-revealed");
+            heroTitle.classList.add("is-forming");
+        }
+
+        function endFormation() {
+            formationIsActive = false;
+            formationMosquitoes = [];
+            heroTitle.classList.remove("is-forming", "is-revealed");
+        }
+
+        function drawAmbientMosquitoes() {
+            ambientMosquitoes.forEach(mosquito => {
                 mosquito.x += mosquito.speedX;
                 mosquito.y += mosquito.speedY;
 
@@ -289,19 +412,127 @@ if (mosquitoCanvas) {
                 context.fillStyle = "rgba(209, 179, 255, 0.2)";
                 context.fill();
             });
+        }
+
+        function drawFormationMosquito(mosquito, elapsed) {
+            const progress = Math.max(0, Math.min(1, (elapsed - mosquito.delay) / 4900));
+            const easedProgress = progress * progress * progress
+                * (progress * (progress * 6 - 15) + 10);
+            const distanceX = mosquito.targetX - mosquito.x;
+            const distanceY = mosquito.targetY - mosquito.y;
+            const distance = Math.hypot(distanceX, distanceY) || 1;
+            const controlX = (mosquito.x + mosquito.targetX) / 2
+                - (distanceY / distance) * mosquito.curve;
+            const controlY = (mosquito.y + mosquito.targetY) / 2
+                + (distanceX / distance) * mosquito.curve;
+            const remaining = 1 - easedProgress;
+            const x = remaining * remaining * mosquito.x
+                + 2 * remaining * easedProgress * controlX
+                + easedProgress * easedProgress * mosquito.targetX
+                + Math.sin(elapsed / 220 + mosquito.phase) * remaining * 1.5;
+            const y = remaining * remaining * mosquito.y
+                + 2 * remaining * easedProgress * controlY
+                + easedProgress * easedProgress * mosquito.targetY
+                + Math.cos(elapsed / 240 + mosquito.phase) * remaining * 1.5;
+            const fadeIn = Math.min(1, Math.max(0, (elapsed - mosquito.delay) / 500));
+            const fadeOut = Math.max(0, 1 - Math.max(0, elapsed - 5600) / 1800);
+            const fade = fadeIn * fadeOut;
+            const tangentX = remaining * (controlX - mosquito.x)
+                + easedProgress * (mosquito.targetX - controlX);
+            const tangentY = remaining * (controlY - mosquito.y)
+                + easedProgress * (mosquito.targetY - controlY);
+            const heading = Math.atan2(tangentY, tangentX);
+            const wingBeat = Math.sin(elapsed / 45 + mosquito.phase) * 0.35;
+
+            context.save();
+            context.translate(x, y);
+            context.rotate(heading);
+            context.globalAlpha = fade * 0.9;
+            context.fillStyle = mosquito.color;
+            context.strokeStyle = mosquito.color;
+            context.lineWidth = 0.55;
+            context.beginPath();
+            context.ellipse(0, 0, mosquito.size, mosquito.size * 0.34, 0, 0, Math.PI * 2);
+            context.fill();
+            context.beginPath();
+            context.ellipse(-mosquito.size * 0.25, -mosquito.size * 0.7,
+                mosquito.size * 0.45, mosquito.size * 0.95, -0.5 + wingBeat, 0, Math.PI * 2);
+            context.ellipse(mosquito.size * 0.25, -mosquito.size * 0.7,
+                mosquito.size * 0.45, mosquito.size * 0.95, 0.5 - wingBeat, 0, Math.PI * 2);
+            context.globalAlpha = fade * 0.38;
+            context.fill();
+            context.globalAlpha = fade * 0.9;
+            context.beginPath();
+            context.moveTo(mosquito.size * 0.65, 0);
+            context.lineTo(mosquito.size * 1.6, 0);
+            context.moveTo(mosquito.size * 0.7, 0);
+            context.lineTo(mosquito.size * 2.2, mosquito.size * 1.2);
+            context.stroke();
+            context.restore();
+        }
+
+        function animateMosquitoes(timestamp) {
+            context.clearRect(0, 0, width, height);
+            drawAmbientMosquitoes();
+
+            if (formationIsActive) {
+                const elapsed = timestamp - formationStartedAt;
+                formationMosquitoes.forEach(mosquito => drawFormationMosquito(mosquito, elapsed));
+
+                if (!titleRevealed && elapsed >= 5200) {
+                    heroTitle.classList.add("is-revealed");
+                    titleRevealed = true;
+                }
+
+                if (elapsed >= formationDuration) {
+                    endFormation();
+                }
+            } else if (titleIsInView && timestamp >= nextFormationAt) {
+                beginFormation(timestamp);
+            }
 
             animationFrame = window.requestAnimationFrame(animateMosquitoes);
         }
 
-        resizeMosquitoCanvas();
-        window.addEventListener("resize", resizeMosquitoCanvas);
+        resizeCanvas();
+        window.addEventListener("resize", () => {
+            resizeCanvas();
+            if (formationIsActive) {
+                beginFormation();
+            }
+        });
+        if ("IntersectionObserver" in window) {
+            const titleObserver = new IntersectionObserver(entries => {
+                const isInView = entries[0].isIntersecting;
+                if (isInView === titleIsInView) return;
+
+                titleIsInView = isInView;
+                if (isInView) {
+                    beginFormation();
+                } else {
+                    endFormation();
+                    nextFormationAt = 0;
+                }
+            }, { threshold: 0.12 });
+            titleObserver.observe(heroTitle);
+        } else {
+            titleIsInView = true;
+            beginFormation();
+        }
         document.addEventListener("visibilitychange", () => {
             if (document.hidden) {
                 window.cancelAnimationFrame(animationFrame);
+                hiddenAt = performance.now();
             } else {
+                if (hiddenAt !== null) {
+                    const pausedDuration = performance.now() - hiddenAt;
+                    if (formationIsActive) formationStartedAt += pausedDuration;
+                    if (nextFormationAt) nextFormationAt += pausedDuration;
+                    hiddenAt = null;
+                }
                 animationFrame = window.requestAnimationFrame(animateMosquitoes);
             }
         });
-        animateMosquitoes();
+        animationFrame = window.requestAnimationFrame(animateMosquitoes);
     }
 }

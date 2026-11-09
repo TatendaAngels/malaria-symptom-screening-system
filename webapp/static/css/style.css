@@ -81,6 +81,7 @@ body {
     grid-template-columns: 1.12fr 0.88fr;
     align-items: center;
     gap: 45px;
+    overflow: hidden;
 
     background:
         radial-gradient(ellipse at 80% 35%, #6429a04d, transparent 42%),
@@ -97,6 +98,19 @@ body {
     font-size: 11px;
     font-weight: bold;
     letter-spacing: 1px;
+    animation: eyebrow-travel 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes eyebrow-travel {
+    0% { transform: translateX(calc(-100vw - 100%)); }
+    14.2857%, 85.7143% { transform: translateX(0); }
+    100% { transform: translateX(calc(100vw + 100%)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .eyebrow {
+        animation: none;
+    }
 }
 
 .hero h1 {
@@ -107,11 +121,24 @@ body {
 }
 
 .hero-title {
-    clip-path: inset(0 100% 0 0);
-    animation: headline-wipe 7s ease-in-out infinite;
+    position: relative;
+    transition: opacity 1.35s ease-in-out;
 }
 
-.hero h1 span {
+.hero-title.is-forming {
+    opacity: 0;
+}
+
+.hero-title.is-forming.is-revealed {
+    opacity: 1;
+}
+
+.hero-title-primary,
+.hero-title-highlight {
+    display: block;
+}
+
+.hero h1 .hero-title-highlight {
     color: #c5a4ff;
 }
 
@@ -251,12 +278,6 @@ body {
 @keyframes spin-reverse {
     0% { transform: translateX(-50%) rotate(0deg); }
     100% { transform: translateX(-50%) rotate(-360deg); }
-}
-
-@keyframes headline-wipe {
-    0%, 8% { clip-path: inset(0 100% 0 0); }
-    42%, 58% { clip-path: inset(0 0 0 0); }
-    92%, 100% { clip-path: inset(0 0 0 100%); }
 }
 
 #mosquito-canvas {
