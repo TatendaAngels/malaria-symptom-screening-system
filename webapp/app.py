@@ -108,5 +108,38 @@ def api_predict():
         # Catch any other unexpected errors
         return jsonify({"error": "An internal server error occurred."}), 500
 
+@app.route("/api/iot-readings", methods=["POST"])
+def iot_readings():
+    data = request.get_json()
+    if not isinstance(data, dict):
+        return jsonify({"status": "error", "message": "A JSON object is required."}), 400
+
+    temp = data.get("temperature")
+    heart_rate = data.get("heart_rate")
+    iot_patient = {
+        "age": 30,
+        "sex": "male",
+        "temp_c": temp,
+        "fever_now": 1,
+    }
+
+    try:
+        risk_result = predict_risk(iot_patient)
+    except ValueError as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
+    except Exception:
+        app.logger.exception("IoT reading prediction failed.")
+        return jsonify({"status": "error", "message": "An internal server error occurred."}), 500
+
+    print(f"IoT Device Data: Temp={temp}°C, Heart Rate={heart_rate} bpm")
+    print(f"AI Response: {risk_result['risk_level']}")
+
+    return jsonify({
+        "status": "success",
+        "message": "Data received from IoT device",
+        "ai_risk_level": risk_result["risk_level"],
+        "ai_advice": risk_result["advice"],
+    }), 200
+
 if __name__ == "__main__":
     app.run(debug=False)
