@@ -37,7 +37,9 @@
             <h1>📡 Live IoT Monitor</h1>
             <p><span class="live-indicator"></span> Auto-refreshing every 3 seconds</p>
             <div id="connection-status" class="status-text">Waiting for data...</div>
-            <h2 id="finger-instruction" style="color: #ffdd00; margin-top: 15px; display: none;">🫵 Please place your finger on the sensor</h2>
+            <div id="instruction-box" style="display: none; margin-top: 15px; padding: 12px 16px; border-radius: 10px;">
+                <p id="instruction-text" style="margin: 0;"></p>
+            </div>
         </div>
 
         <div class="grid-cards">
@@ -110,15 +112,30 @@
                 if (diffSeconds > 30) {
                     document.getElementById('connection-status').innerText = "⚠️ Device disconnected. Showing last known data.";
                     document.getElementById('connection-status').style.color = "#ff4d4d";
-                    document.getElementById('finger-instruction').style.display = "none";
+                    document.getElementById('instruction-box').style.display = "none";
                 } else {
                     document.getElementById('connection-status').innerText = "✅ Device Connected & Live";
                     document.getElementById('connection-status').style.color = "#00cc44";
 
+                    // --- Smart Instruction Logic ---
+                    const instructionBox = document.getElementById('instruction-box');
+                    const instructionText = document.getElementById('instruction-text');
+                    instructionBox.style.display = "block";
+
                     if (latest.heart_rate < 10) {
-                        document.getElementById('finger-instruction').style.display = "block";
-                    } else {
-                        document.getElementById('finger-instruction').style.display = "none";
+                        instructionText.innerText = "🫵 Please place your finger on the sensor and hold the thermometer.";
+                        instructionText.style.color = "#ffdd00";
+                        instructionBox.style.border = "1px solid #ffdd00";
+                    }
+                    else if (diffSeconds < 5) {
+                        instructionText.innerText = "🌡️ Hold still. Collecting readings and checking temperature stability...";
+                        instructionText.style.color = "#d1b3ff";
+                        instructionBox.style.border = "1px solid #d1b3ff";
+                    }
+                    else {
+                        instructionText.innerText = "✅ Reading captured successfully. Please REMOVE your finger.";
+                        instructionText.style.color = "#00cc44";
+                        instructionBox.style.border = "1px solid #00cc44";
                     }
                 }
 
