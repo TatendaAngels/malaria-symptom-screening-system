@@ -106,7 +106,7 @@
                 }
 
                 // Check if data is stale (older than 15 seconds)
-                const lastUpdate = new Date(latest.timestamp);
+                const lastUpdate = new Date(latest.timestamp + "Z");
                 const now = new Date();
                 const diffSeconds = (now - lastUpdate) / 1000;
 
@@ -126,7 +126,7 @@
                 riskEl.innerText = latest.risk_level.toUpperCase();
                 riskEl.className = `value risk-${latest.risk_level}`;
 
-                document.getElementById('live-time').innerText = lastUpdate.toLocaleTimeString();
+                document.getElementById('live-time').innerText = lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                 // Fetch History
                 const historyRes = await fetch('/api/iot-history');
