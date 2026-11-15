@@ -17,40 +17,39 @@
         .btn-group { margin-top: 20px; display: flex; gap: 10px; }
         .btn { padding: 10px 20px; border-radius: 20px; cursor: pointer; border: none; background: #d1b3ff; color: #000; font-weight: bold; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        /* Premium Result Card Styles */
-        .result-card { 
-            padding: 25px; 
-            border-radius: 16px; 
-            margin-top: 20px; 
-            background-color: #2a2a40; /* Darker purple/grey card */
-            border-left: 6px solid; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            color: #f0f0f0;
+        .result-card {
+            --risk-color: #b7a0d4;
+            margin-top: 24px;
+            padding: 24px;
+            border: 1px solid #ffffff1a;
+            border-left: 5px solid var(--risk-color);
+            border-radius: 16px;
+            background: #241832;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+            color: #f5f0fa;
         }
-        
-        /* Color-coded borders for the risk levels */
-        .risk-urgent { border-left-color: #ff4d4d; }
-        .risk-higher { border-left-color: #ffaa00; }
-        .risk-moderate { border-left-color: #ffdd00; }
-        .risk-lower { border-left-color: #00cc44; }
-
-        .result-card h3 { 
-            margin-top: 0; 
-            font-size: 1.4em; 
-            margin-bottom: 10px;
-            color: #ffffff;
-        }
-        
-        .result-card p { 
-            line-height: 1.6; 
-            margin-bottom: 12px;
-            color: #cccccc; /* Light grey for readability */
-        }
-
-        .result-card .advice-text {
-            font-size: 1.1em;
-            color: #ffffff;
-            font-weight: 500;
+        .result-card.risk-lower { --risk-color: #58d6a0; }
+        .result-card.risk-moderate { --risk-color: #f0ce65; }
+        .result-card.risk-higher { --risk-color: #f0a35f; }
+        .result-card.risk-urgent { --risk-color: #f2767d; }
+        .result-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+        .result-eyebrow { margin: 0 0 6px; color: #b9a9cc; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+        .result-card h3 { margin: 0; color: #fff; font-size: 1.35rem; }
+        .risk-badge { flex: 0 0 auto; padding: 7px 12px; border: 1px solid var(--risk-color); border-radius: 999px; color: var(--risk-color); font-size: 0.82rem; font-weight: 700; text-transform: capitalize; }
+        .result-divider { height: 1px; margin: 18px 0; background: #ffffff18; }
+        .result-section-label { display: block; margin-bottom: 8px; color: #b9a9cc; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+        .result-advice { padding: 16px; border: 1px solid #ffffff12; border-radius: 12px; background: #ffffff08; }
+        .result-card p { margin: 0; color: #e4dbea; line-height: 1.7; }
+        .result-card .advice-text { color: #fff; font-size: 1rem; font-weight: 600; }
+        .result-factors { margin-top: 18px !important; color: #d3c6df !important; }
+        .result-factors strong { color: #fff; }
+        .result-danger { margin-bottom: 16px; padding: 14px 16px; border: 1px solid #f2767d66; border-radius: 12px; background: #f2767d12; }
+        .result-danger strong { display: block; margin-bottom: 5px; color: #ff9a9f; }
+        .result-danger p { color: #f4dfe0; }
+        .result-disclaimer { margin-top: 18px !important; padding-top: 16px; border-top: 1px solid #ffffff18; color: #b9a9cc !important; font-size: 0.82rem; }
+        @media (max-width: 480px) {
+            .result-card { padding: 18px; }
+            .result-card-header { flex-direction: column; }
         }
 
         /* Mobile Responsiveness */
@@ -236,23 +235,31 @@
 
                 // Build the result HTML
                 let factorsHtml = result.main_factors.length > 0 
-                    ? `<p><strong>Main reasons:</strong> ${result.main_factors.join(", ")}</p>` 
+                    ? `<p class="result-factors"><strong>Main factors</strong><br>${result.main_factors.join(", ")}</p>` 
                     : "";
                     
                 let dangerHtml = result.danger_signs.length > 0
-                    ? `<p style="color: #ff4d4d; font-weight: bold;">🚨 Danger Signs Detected: ${result.danger_signs.join(", ")}. Please seek immediate medical help!</p>`
+                    ? `<div class="result-danger" role="alert"><strong>Danger signs detected</strong><p>${result.danger_signs.join(", ")}. Please seek immediate medical help.</p></div>`
                     : "";
 
                 container.innerHTML = `
-                    <div class="result-card risk-${result.risk_level}">
-                        <h3>Risk Level: <span style="text-transform: capitalize;">${result.risk_level}</span></h3>
+                    <section class="result-card risk-${result.risk_level}" aria-live="polite">
+                        <div class="result-card-header">
+                            <div>
+                                <p class="result-eyebrow">Screening result</p>
+                                <h3>Your result</h3>
+                            </div>
+                            <span class="risk-badge">${result.risk_level}</span>
+                        </div>
+                        <div class="result-divider"></div>
                         ${dangerHtml}
-                        <p class="advice-text">💡 ${result.advice}</p>
+                        <div class="result-advice">
+                            <span class="result-section-label">Recommended next step</span>
+                            <p class="advice-text">${result.advice}</p>
+                        </div>
                         ${factorsHtml}
-                        <p style="font-size: 0.85em; margin-top: 20px; padding-top: 15px; border-top: 1px solid #444; color: #999;">
-                            ⚠️ ${result.disclaimer}
-                        </p>
-                    </div>
+                        <p class="result-disclaimer">⚠️ ${result.disclaimer}</p>
+                    </section>
                 `;
 
             } catch (error) {

@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from flask import Flask, jsonify, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+from sqlalchemy.exc import SQLAlchemyError
 
 # Load environment variables
 load_dotenv(Path(__file__).resolve().with_name(".env"))
@@ -300,6 +301,26 @@ def get_iot_history():
     history = [reading.to_dict() for reading in reversed(readings)]
 
     return jsonify(history), 200
+
+
+@app.route("/api/iot-clear", methods=["POST"])
+def clear_iot_data():
+    if request.remote_addr not in ("127.0.0.1", "::1"):
+        return jsonify({"status": "error", "message": "This action is only available locally."}), 403
+
+    origin = request.headers.get("Origin", "").rstrip("/")
+    if origin != request.host_url.rstrip("/"):
+        return jsonify({"status": "error", "message": "A same-origin request is required."}), 403
+
+    try:
+        num_deleted = db.session.query(IoTReading).delete()
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        app.logger.exception("Failed to clear IoT history")
+        return jsonify({"status": "error", "message": "Could not clear IoT history."}), 500
+
+    return jsonify({"status": "success", "message": f"Deleted {num_deleted} records"}), 200
 
 
 # RUN FLASK SERVER
