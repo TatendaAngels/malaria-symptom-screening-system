@@ -32,13 +32,12 @@
     </style>
 </head>
 <body>
-    <!-- Include your navbar here if you have a common one -->
-
     <div class="dashboard-container">
         <div class="dashboard-header">
             <h1>📡 Live IoT Monitor</h1>
             <p><span class="live-indicator"></span> Auto-refreshing every 3 seconds</p>
             <div id="connection-status" class="status-text">Waiting for data...</div>
+            <h2 id="finger-instruction" style="color: #ffdd00; margin-top: 15px; display: none;">🫵 Please place your finger on the sensor</h2>
         </div>
 
         <div class="grid-cards">
@@ -68,59 +67,66 @@
                 <canvas id="hrChart"></canvas>
             </div>
         </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <p style="color: #aaa; margin-bottom: 10px;">Ready to check your symptoms?</p>
+            <button onclick="goToScreening()" id="start-btn" class="nav-button" style="padding: 15px 30px; font-size: 1.1em; border-radius: 30px; cursor: pointer; border: none; background: #d1b3ff; color: black; font-weight: bold;">
+                Complete Screening with these Vitals →
+            </button>
+        </div>
     </div>
 
     <script>
-        // Initialize Chart.js
         const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: {
-                x: { display: false }, // Hide X axis for cleaner look
-                y: { grid: { color: '#3b3b5c' }, ticks: { color: '#aaa' } }
-            }
+            scales: { x: { display: false }, y: { grid: { color: '#3b3b5c' }, ticks: { color: '#aaa' } } }
         };
 
         const tempChart = new Chart(document.getElementById('tempChart'), {
-            type: 'line',
-            data: { labels: [], datasets: [{ label: 'Temperature', data: [], borderColor: '#d1b3ff', tension: 0.4 }] },
+            type: 'line', data: { labels: [], datasets: [{ label: 'Temperature', data: [], borderColor: '#d1b3ff', tension: 0.4 }] },
             options: { ...commonOptions, plugins: { ...commonOptions.plugins, title: { display: true, text: 'Temperature History', color: 'white' } } }
         });
 
         const hrChart = new Chart(document.getElementById('hrChart'), {
-            type: 'line',
-            data: { labels: [], datasets: [{ label: 'Heart Rate', data: [], borderColor: '#ff4d4d', tension: 0.4 }] },
+            type: 'line', data: { labels: [], datasets: [{ label: 'Heart Rate', data: [], borderColor: '#ff4d4d', tension: 0.4 }] },
             options: { ...commonOptions, plugins: { ...commonOptions.plugins, title: { display: true, text: 'Heart Rate History', color: 'white' } } }
         });
 
+        let currentTemp = 0;
+        let currentHR = 0;
+
         async function fetchData() {
             try {
-                // Fetch Latest
                 const latestRes = await fetch('/api/iot-latest');
                 const latest = await latestRes.json();
 
-                if (latest.status === 'no_data' || !latest.timestamp) {
-                    document.getElementById('connection-status').innerText = "No data received yet. Connect hardware.";
-                    return;
-                }
+                if (latest.status === 'no_data' || !latest.timestamp) return;
 
-                // Check if data is stale (older than 15 seconds)
                 const lastUpdate = new Date(latest.timestamp + "Z");
                 const now = new Date();
                 const diffSeconds = (now - lastUpdate) / 1000;
 
-                if (diffSeconds > 15) {
+                if (diffSeconds > 30) {
                     document.getElementById('connection-status').innerText = "⚠️ Device disconnected. Showing last known data.";
                     document.getElementById('connection-status').style.color = "#ff4d4d";
+                    document.getElementById('finger-instruction').style.display = "none";
                 } else {
                     document.getElementById('connection-status').innerText = "✅ Device Connected & Live";
                     document.getElementById('connection-status').style.color = "#00cc44";
+
+                    if (latest.heart_rate < 10) {
+                        document.getElementById('finger-instruction').style.display = "block";
+                    } else {
+                        document.getElementById('finger-instruction').style.display = "none";
+                    }
                 }
 
-                // Update Cards
-                document.getElementById('live-temp').innerHTML = `${latest.temperature.toFixed(1)} <span class="unit">°C</span>`;
-                document.getElementById('live-hr').innerHTML = `${latest.heart_rate.toFixed(1)} <span class="unit">BPM</span>`;
+                currentTemp = latest.temperature;
+                currentHR = latest.heart_rate;
+
+                document.getElementById('live-temp').innerHTML = `${currentTemp.toFixed(1)} <span class="unit">°C</span>`;
+                document.getElementById('live-hr').innerHTML = `${currentHR.toFixed(1)} <span class="unit">BPM</span>`;
 
                 const riskEl = document.getElementById('live-risk');
                 riskEl.innerText = latest.risk_level.toUpperCase();
@@ -128,21 +134,17 @@
 
                 document.getElementById('live-time').innerText = lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                // Fetch History
                 const historyRes = await fetch('/api/iot-history');
                 const history = await historyRes.json();
 
-                const labels = history.map(h => new Date(h.timestamp).toLocaleTimeString());
-                const temps = history.map(h => h.temperature);
-                const hrs = history.map(h => h.heart_rate);
+                const labels = history.map(h => new Date(h.timestamp + "Z").toLocaleTimeString());
 
-                // Update Graphs
                 tempChart.data.labels = labels;
-                tempChart.data.datasets[0].data = temps;
+                tempChart.data.datasets[0].data = history.map(h => h.temperature);
                 tempChart.update();
 
                 hrChart.data.labels = labels;
-                hrChart.data.datasets[0].data = hrs;
+                hrChart.data.datasets[0].data = history.map(h => h.heart_rate);
                 hrChart.update();
 
             } catch (error) {
@@ -150,7 +152,14 @@
             }
         }
 
-        // Run immediately, then every 3 seconds
+        function goToScreening() {
+            if (currentTemp === 0) {
+                alert("Please wait for the sensor to read your temperature.");
+                return;
+            }
+            window.location.href = `/screening?temp=${encodeURIComponent(currentTemp)}&hr=${encodeURIComponent(currentHR)}`;
+        }
+
         fetchData();
         setInterval(fetchData, 3000);
     </script>

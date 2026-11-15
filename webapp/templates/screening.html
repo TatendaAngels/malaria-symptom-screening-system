@@ -164,6 +164,30 @@
     </main>
 
     <script>
+        // --- Auto-fill from IoT Dashboard ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const temp = Number(urlParams.get('temp'));
+            const hrParam = urlParams.get('hr');
+            const hr = hrParam === null ? NaN : Number(hrParam);
+
+            if (!urlParams.has('temp') || !Number.isFinite(temp) || temp < 34 || temp > 43) return;
+
+            const tempInput = document.querySelector('input[name="temp_c"]');
+            if (tempInput) tempInput.value = temp.toFixed(1);
+
+            const step1 = document.getElementById('step1');
+            if (!step1) return;
+
+            const banner = document.createElement('div');
+            banner.style.cssText = "background: #3b3b5c; padding: 10px; border-radius: 8px; margin-bottom: 15px; color: #d1b3ff; font-size: 0.9em; text-align: center;";
+            const heading = document.createElement('strong');
+            heading.textContent = 'Vitals received from IoT device:';
+            banner.append('📡 ', heading, document.createElement('br'));
+            banner.append(`Temp: ${temp.toFixed(1)}°C | Heart Rate: ${Number.isFinite(hr) ? hr.toFixed(0) : 'Unavailable'} BPM`);
+            step1.insertBefore(banner, step1.firstChild);
+        });
+
         // Step Navigation
         function nextStep(stepNumber) {
             // Basic HTML5 validation for step 1
