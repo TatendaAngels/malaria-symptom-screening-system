@@ -134,6 +134,59 @@ def test_api_invalid_temperature(client):
     assert response.status_code == 400
     assert "error" in response.get_json()
 
+def test_iot_readings_predicts_using_device_temperature(client, monkeypatch):
+    received = {}
+    monkeypatch.setattr(
+        "webapp.app.predict_risk",
+        lambda patient: received.update(patient) or {
+            "risk_level": "moderate",
+            "advice": "Get a malaria blood test.",
+        },
+    )
+
+    response = client.post('/api/iot-readings', json={
+        "temperature": 38.5,
+        "heart_rate": 92,
+    })
+
+    assert response.status_code == 200
+    assert received == {
+        "age": 30,
+        "sex": "male",
+        "temp_c": 38.5,
+        "fever_now": 1,
+    }
+    assert response.get_json() == {
+        "status": "success",
+        "message": "Data received",
+        "ai_risk_level": "moderate",
+        "ai_advice": "Get a malaria blood test.",
+    }
+
+def test_iot_readings_missing_temperature(client):
+    response = client.post('/api/iot-readings', json={"heart_rate": 92})
+
+    assert response.status_code == 400
+    assert response.get_json() == {
+        "status": "error",
+        "message": "No temperature provided",
+    }
+
+def test_iot_readings_sets_fever_from_temperature(client, monkeypatch):
+    received = {}
+    monkeypatch.setattr(
+        "webapp.app.predict_risk",
+        lambda patient: received.update(patient) or {
+            "risk_level": "lower",
+            "advice": "Get tested if fever continues.",
+        },
+    )
+
+    response = client.post('/api/iot-readings', json={"temperature": 37.5})
+
+    assert response.status_code == 200
+    assert received["fever_now"] == 0
+
 def test_danger_sign_override(client):
     """Test that checking a danger sign forces an 'urgent' risk level."""
     # Even with a high age and no other symptoms, a danger sign should trigger urgent
