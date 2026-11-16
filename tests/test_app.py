@@ -24,6 +24,16 @@ def test_screening_page_loads(client):
     response = client.get('/screening')
     assert response.status_code == 200
 
+def test_iot_dashboard_shows_separate_sensor_progress(client):
+    response = client.get('/iot-dashboard')
+
+    assert response.status_code == 200
+    assert b'id="temp-progress-card"' in response.data
+    assert b'id="heart-progress-card"' in response.data
+    assert b'aria-label="Temperature sensor progress"' in response.data
+    assert b'aria-label="Heart sensor progress"' in response.data
+    assert b'id="measurement-progress"' not in response.data
+
 def test_contact_page_has_required_form_fields(client):
     response = client.get('/contact')
 

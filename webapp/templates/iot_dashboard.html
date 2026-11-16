@@ -38,9 +38,21 @@
 
         .charts-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
         .chart-box { height: 320px; padding: 22px; border: 1px solid #ffffff18; border-radius: 16px; background: #21162e; box-shadow: 0 10px 24px #09041133; }
-        .measurement-progress { height: 8px; margin-top: 12px; overflow: hidden; border-radius: 999px; background: #ffffff1a; }
-        .measurement-progress-fill { width: 0; height: 100%; border-radius: inherit; background: #a879f5; transition: width 450ms ease, background-color 200ms ease; }
-        .measurement-progress-meta { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: #b9a9cc; font-size: 0.78rem; }
+        .sensor-progress-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 560px; margin: 20px auto 0; }
+        .sensor-progress-card { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1px solid #ffffff18; border-radius: 14px; background: #21162e; text-align: left; }
+        .sensor-progress-ring { --progress: 0%; --sensor-color: #c4a2ff; position: relative; display: grid; width: 58px; height: 58px; flex: 0 0 58px; place-items: center; border-radius: 50%; background: conic-gradient(var(--sensor-color) var(--progress), #ffffff1a 0); }
+        .sensor-progress-ring::before { position: absolute; width: 46px; height: 46px; border-radius: 50%; background: #21162e; content: ""; }
+        .sensor-progress-ring::after { position: absolute; inset: -4px; border: 2px solid transparent; border-top-color: var(--sensor-color); border-right-color: var(--sensor-color); border-radius: 50%; opacity: 0; content: ""; }
+        .sensor-progress-card.is-active .sensor-progress-ring::after { opacity: 0.8; animation: sensor-spin 1.4s linear infinite; }
+        .sensor-progress-ring--heart { --sensor-color: #ff8496; }
+        .sensor-progress-value { z-index: 1; color: white; font-size: 0.78rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+        .sensor-progress-copy { display: grid; gap: 5px; min-width: 0; }
+        .sensor-progress-title { color: #fff; font-size: 0.9rem; font-weight: 700; }
+        .sensor-progress-status { color: #b9a9cc; font-size: 0.77rem; }
+        .sensor-progress-card.is-complete .sensor-progress-ring { --sensor-color: #43e6a2; }
+        .sensor-progress-card.is-complete .sensor-progress-ring::after { display: none; }
+        @keyframes sensor-spin { to { transform: rotate(360deg); } }
+        @media (max-width: 520px) { .sensor-progress-grid { grid-template-columns: 1fr; } }
         @media (max-width: 960px) { .grid-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 680px) {
             .dashboard-container { margin-top: 20px; padding: 16px; }
@@ -50,7 +62,8 @@
         }
         @media (prefers-reduced-motion: reduce) {
             .live-indicator { animation: none; }
-            .metric-card, .measurement-progress-fill { transition: none; }
+            .metric-card, .sensor-progress-ring { transition: none; }
+            .sensor-progress-card.is-active .sensor-progress-ring::after { animation: none; }
         }
     </style>
 </head>
@@ -62,12 +75,21 @@
             <div id="connection-status" class="status-text">Waiting for data...</div>
             <div id="instruction-box" style="display: none; margin-top: 15px; padding: 12px 16px; border-radius: 10px;">
                 <p id="instruction-text" style="margin: 0;"></p>
-                <div id="measurement-progress" class="measurement-progress" role="progressbar" aria-label="Measurement progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                    <div id="measurement-progress-fill" class="measurement-progress-fill"></div>
+            </div>
+            <div class="sensor-progress-grid" aria-label="Live sensor measurement progress">
+                <div id="temp-progress-card" class="sensor-progress-card" role="progressbar" aria-label="Temperature sensor progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="sensor-progress-ring"><span id="temp-progress-value" class="sensor-progress-value">0%</span></div>
+                    <div class="sensor-progress-copy">
+                        <span class="sensor-progress-title">🌡️ Temperature sensor</span>
+                        <span id="temp-progress-status" class="sensor-progress-status">Waiting for a reading</span>
+                    </div>
                 </div>
-                <div class="measurement-progress-meta">
-                    <span id="measurement-progress-label">Waiting for sensor</span>
-                    <span id="measurement-progress-value">0%</span>
+                <div id="heart-progress-card" class="sensor-progress-card" role="progressbar" aria-label="Heart sensor progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="sensor-progress-ring sensor-progress-ring--heart"><span id="heart-progress-value" class="sensor-progress-value">0%</span></div>
+                    <div class="sensor-progress-copy">
+                        <span class="sensor-progress-title">💓 Heart sensor</span>
+                        <span id="heart-progress-status" class="sensor-progress-status">Waiting for a reading</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -165,17 +187,53 @@
 
         let currentTemp = 0;
         let currentHR = 0;
-        let collectedSamples = 0;
-        let lastCollectionTimestamp = null;
+        const sensorProgress = {
+            temp: { samples: 0, lastTimestamp: null },
+            heart: { samples: 0, lastTimestamp: null }
+        };
 
-        function setMeasurementProgress(percent, label) {
-            const progress = document.getElementById('measurement-progress');
-            const fill = document.getElementById('measurement-progress-fill');
-            progress.setAttribute('aria-valuenow', String(percent));
-            fill.style.width = `${percent}%`;
-            fill.style.backgroundColor = percent === 100 ? "#43e6a2" : "#a879f5";
-            document.getElementById('measurement-progress-label').innerText = label;
-            document.getElementById('measurement-progress-value').innerText = `${percent}%`;
+        function setSensorProgress(sensor, percent, status, active) {
+            const card = document.getElementById(`${sensor}-progress-card`);
+            const ring = card.querySelector('.sensor-progress-ring');
+            card.setAttribute('aria-valuenow', String(percent));
+            card.classList.toggle('is-active', active);
+            card.classList.toggle('is-complete', percent === 100);
+            ring.style.setProperty('--progress', `${percent}%`);
+            document.getElementById(`${sensor}-progress-value`).innerText = `${percent}%`;
+            document.getElementById(`${sensor}-progress-status`).innerText = status;
+        }
+
+        function resetSensorProgress(status) {
+            for (const sensor of ['temp', 'heart']) {
+                sensorProgress[sensor] = { samples: 0, lastTimestamp: null };
+                setSensorProgress(sensor, 0, status, false);
+            }
+        }
+
+        function updateSensorProgress(latest, isStale, diffSeconds) {
+            if (isStale || diffSeconds > 10) {
+                resetSensorProgress("Waiting for a reading");
+                return;
+            }
+
+            const readings = [
+                { key: 'temp', value: latest.temperature },
+                { key: 'heart', value: latest.heart_rate }
+            ];
+            for (const reading of readings) {
+                const state = sensorProgress[reading.key];
+                if (latest.timestamp !== state.lastTimestamp) {
+                    state.samples = Math.min(state.samples + 1, 5);
+                    state.lastTimestamp = latest.timestamp;
+                }
+                const percent = state.samples * 20;
+                const status = percent === 100
+                    ? `${Number(reading.value).toFixed(reading.key === 'temp' ? 1 : 0)} ${reading.key === 'temp' ? '°C' : 'BPM'} · reading ready`
+                    : state.samples > 0
+                        ? `Receiving readings · ${state.samples}/5`
+                        : "Waiting for a reading";
+                setSensorProgress(reading.key, percent, status, percent > 0 && percent < 100);
+            }
         }
 
         async function fetchData() {
@@ -183,7 +241,10 @@
                 const latestRes = await fetch('/api/iot-latest');
                 const latest = await latestRes.json();
 
-                if (latest.status === 'no_data' || !latest.timestamp) return;
+                if (latest.status === 'no_data' || !latest.timestamp) {
+                    resetSensorProgress("Waiting for a reading");
+                    return;
+                }
 
                 const lastUpdate = new Date(latest.timestamp + "Z");
                 const now = new Date();
@@ -194,9 +255,7 @@
                     document.getElementById('connection-status').innerText = "⚠️ Device disconnected. Showing last known data.";
                     document.getElementById('connection-status').style.color = "#ff4d4d";
                     document.getElementById('instruction-box').style.display = "none";
-                    collectedSamples = 0;
-                    lastCollectionTimestamp = null;
-                    setMeasurementProgress(0, "Waiting for sensor");
+                    resetSensorProgress("Waiting for a reading");
                 } else {
                     document.getElementById('connection-status').innerText = "✅ Device Connected & Live";
                     document.getElementById('connection-status').style.color = "#00cc44";
@@ -207,39 +266,27 @@
                     instructionBox.style.display = "block";
 
                     if (latest.heart_rate < 10) {
-                        collectedSamples = 0;
-                        lastCollectionTimestamp = null;
-                        setMeasurementProgress(0, "Place finger to begin");
                         instructionText.innerText = "🫵 Please place your finger on the sensor and hold the thermometer.";
                         instructionText.style.color = "#ffdd00";
                         instructionBox.style.border = "1px solid #ffdd00";
                     }
                     else if (diffSeconds < 5) {
-                        if (latest.timestamp !== lastCollectionTimestamp) {
-                            collectedSamples += 1;
-                            lastCollectionTimestamp = latest.timestamp;
-                        }
-                        const progressPercent = Math.min(collectedSamples * 20, 90);
-                        setMeasurementProgress(progressPercent, "Collecting sensor readings");
                         instructionText.innerText = "🌡️ Hold still. Collecting readings and checking temperature stability...";
                         instructionText.style.color = "#d1b3ff";
                         instructionBox.style.border = "1px solid #d1b3ff";
                     }
                     else if (diffSeconds < 10) {
-                        setMeasurementProgress(100, "Reading captured");
                         instructionText.innerText = "✅ Reading captured successfully. Please REMOVE your finger.";
                         instructionText.style.color = "#00cc44";
                         instructionBox.style.border = "1px solid #00cc44";
                     }
                     else {
-                        collectedSamples = 0;
-                        lastCollectionTimestamp = null;
-                        setMeasurementProgress(0, "Ready for next patient");
                         instructionText.innerText = "👤 Ready for the next patient. Please place their finger on the sensor.";
                         instructionText.style.color = "#ffdd00";
                         instructionBox.style.border = "1px solid #ffdd00";
                     }
                 }
+                updateSensorProgress(latest, isStale, diffSeconds);
 
                 document.getElementById('temp-status-text').innerText = isStale
                     ? "Last known sensor reading"
