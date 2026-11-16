@@ -187,9 +187,11 @@
 
         let currentTemp = 0;
         let currentHR = 0;
-        const sensorProgress = {
-            temp: { samples: 0, lastTimestamp: null },
-            heart: { samples: 0, lastTimestamp: null }
+        const measurementProgress = {
+            lastTimestamp: null,
+            lastUpdateAt: null,
+            latest: null,
+            percent: 0
         };
 
         function setSensorProgress(sensor, percent, status, active) {
@@ -205,9 +207,25 @@
 
         function resetSensorProgress(status) {
             for (const sensor of ['temp', 'heart']) {
-                sensorProgress[sensor] = { samples: 0, lastTimestamp: null };
                 setSensorProgress(sensor, 0, status, false);
             }
+            measurementProgress.lastTimestamp = null;
+            measurementProgress.lastUpdateAt = null;
+            measurementProgress.latest = null;
+            measurementProgress.percent = 0;
+        }
+
+        function renderSensorProgress(captured) {
+            const latest = measurementProgress.latest;
+            const percent = measurementProgress.percent;
+            const tempStatus = captured
+                ? `${Number(latest.temperature).toFixed(1)} °C · reading ready`
+                : percent > 0 ? "Collecting temperature" : "Waiting for a reading";
+            const heartStatus = captured
+                ? `${Number(latest.heart_rate).toFixed(0)} BPM · reading ready`
+                : percent > 0 ? "Collecting heart rate" : "Waiting for a reading";
+            setSensorProgress('temp', percent, tempStatus, percent > 0 && !captured);
+            setSensorProgress('heart', percent, heartStatus, percent > 0 && !captured);
         }
 
         function updateSensorProgress(latest, isStale, diffSeconds) {
@@ -216,24 +234,20 @@
                 return;
             }
 
-            const readings = [
-                { key: 'temp', value: latest.temperature },
-                { key: 'heart', value: latest.heart_rate }
-            ];
-            for (const reading of readings) {
-                const state = sensorProgress[reading.key];
-                if (latest.timestamp !== state.lastTimestamp) {
-                    state.samples = Math.min(state.samples + 1, 5);
-                    state.lastTimestamp = latest.timestamp;
+            if (latest.timestamp !== measurementProgress.lastTimestamp) {
+                if (measurementProgress.lastTimestamp === null || measurementProgress.percent === 100) {
+                    measurementProgress.percent = 1;
                 }
-                const percent = state.samples * 20;
-                const status = percent === 100
-                    ? `${Number(reading.value).toFixed(reading.key === 'temp' ? 1 : 0)} ${reading.key === 'temp' ? '°C' : 'BPM'} · reading ready`
-                    : state.samples > 0
-                        ? `Receiving readings · ${state.samples}/5`
-                        : "Waiting for a reading";
-                setSensorProgress(reading.key, percent, status, percent > 0 && percent < 100);
+                measurementProgress.lastTimestamp = latest.timestamp;
+                measurementProgress.lastUpdateAt = Date.now();
+                measurementProgress.latest = latest;
             }
+
+            const captured = diffSeconds >= 5;
+            if (captured) {
+                measurementProgress.percent = 100;
+            }
+            renderSensorProgress(captured);
         }
 
         async function fetchData() {
@@ -341,6 +355,15 @@
 
         fetchData();
         setInterval(fetchData, 3000);
+        setInterval(() => {
+            if (measurementProgress.latest && measurementProgress.lastUpdateAt !== null && measurementProgress.percent < 99) {
+                const secondsSinceReading = (Date.now() - measurementProgress.lastUpdateAt) / 1000;
+                if (secondsSinceReading < 5) {
+                    measurementProgress.percent = Math.min(99, measurementProgress.percent + 1);
+                    renderSensorProgress(false);
+                }
+            }
+        }, 50);
     </script>
 </body>
 </html>
